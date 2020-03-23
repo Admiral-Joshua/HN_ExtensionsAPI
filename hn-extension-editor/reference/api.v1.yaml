@@ -1,0 +1,522 @@
+openapi: 3.0.0
+info:
+  title: api
+  version: '1.0'
+  description: A set of RESTful API urls to be used for creation of and editing Hacknet Extensions.
+  license:
+    name: UNLICENSED
+  contact:
+    name: Joshua Richardson-Noyes
+    email: admiraljrn@outlook.com
+    url: lunasphere.co.uk
+servers:
+  - url: 'http://localhost:3000'
+    description: Local Dev
+  - url: 'http://hn.luansphere.co.uk'
+    description: Production
+tags:
+  - name: Extension Info
+    description: Information about an extension and how it should start-up.
+  - name: CompNode Ops
+    description: Information about computers created/registered to an extension.
+  - name: Mission Ops
+    description: Information about missions created/registered to an extension.
+paths:
+  /extension/new:
+    post:
+      summary: Create new
+      operationId: post-extension-new
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionInfo'
+      description: Creates a new extension with the specified info object.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionInfo'
+            examples: {}
+      tags:
+        - Extension Info
+  '/extension/update/{id}':
+    parameters:
+      - schema:
+          type: integer
+        name: id
+        in: path
+        required: true
+    post:
+      summary: Update Extension Info
+      operationId: post-extension-update-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionInfo'
+      description: Updates specified ExtensionInfo with new information.
+      tags:
+        - Extension Info
+  '/extension/{id}':
+    parameters:
+      - schema:
+          type: integer
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Extension Info
+      responses:
+        '200':
+          description: Extension Info Data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionInfo'
+        '404':
+          description: Extension specified could not be found.
+      operationId: get-extension-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionInfo'
+      description: "Fetches the extension info for extension with given ID. Returns it's data."
+  '/extension/delete/{id}':
+    parameters:
+      - schema:
+          type: number
+        name: id
+        in: path
+        required: true
+    delete:
+      summary: ''
+      operationId: delete-extension-delete-id
+      responses:
+        '204':
+          description: Deletion was Successful
+      description: Delete extension from the database with all associated information by the given the ID.
+      tags:
+        - Extension Info
+  /nodes/new:
+    post:
+      summary: Create new Computer
+      operationId: post-nodes-new
+      responses:
+        '200':
+          description: Computer Created Successfully.
+        '404':
+          description: Extension not found
+      description: Creates new computer for the specified extension with the included information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputerNode'
+      tags:
+        - CompNode Ops
+  '/nodes/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags:
+        - CompNode Ops
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputerNode'
+              examples: {}
+          headers: {}
+        '404':
+          description: Not Found
+      operationId: get-nodes-id
+      description: Returns information about the specified node under this extension.
+  '/nodes/delete/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    delete:
+      summary: ''
+      operationId: delete-nodes-delete-id
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      description: Deletes computer with specified ID under the given extension.
+      tags:
+        - CompNode Ops
+  '/nodes/update/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    post:
+      summary: Update Computer Info
+      operationId: post-nodes-update-id
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      description: 'Updates specified computer with POSTed information, under the current extension.'
+      tags:
+        - CompNode Ops
+  /missions/new:
+    post:
+      summary: Create Mission
+      operationId: post-missions-new
+      responses:
+        '200':
+          description: OK
+      description: 'Creates a new mission with the specified information, under the current extension.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Mission'
+        description: ''
+      tags:
+        - Mission Ops
+  '/missions/update/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    post:
+      summary: Update Mission Data
+      operationId: post-missions-update-id
+      responses:
+        '200':
+          description: OK
+      description: Updates a mission at the specified ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Mission'
+      tags:
+        - Mission Ops
+  '/missions/delete/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    delete:
+      summary: Delete Mission
+      operationId: delete-missions-delete-id
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+      description: 'Deletes a mission with the specified ID, under the current extension.'
+      tags:
+        - Mission Ops
+  '/missions/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get Mission Info
+      tags:
+        - Mission Ops
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Mission'
+      operationId: get-missions-id
+      description: 'Fetches mission details for mission with the given ID, under the current extension.'
+components:
+  schemas:
+    ExtensionInfo:
+      title: ExtensionInfo
+      type: object
+      x-tags:
+        - Extension Info
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        allow_saves:
+          type: boolean
+        starting_comps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputerNode'
+        starting_mission:
+          $ref: '#/components/schemas/HN_Mission'
+        starting_actions:
+          type: string
+        description:
+          type: string
+        factions:
+          type: array
+          items: {}
+        theme:
+          type: string
+        starting_music:
+          type: string
+        sequencer_info:
+          type: object
+        workshop_description:
+          type: string
+        workshop_language:
+          type: string
+        workshop_visibility:
+          type: integer
+        language:
+          type: integer
+        workshop_tags:
+          type: array
+          items:
+            type: string
+        workshop_img:
+          type: string
+        workshop_id:
+          type: string
+      required:
+        - name
+        - language
+    ComputerNode:
+      title: ComputerNode
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ip:
+          type: string
+        security:
+          type: integer
+        allowsDefaultBootModule:
+          type: boolean
+        icon:
+          type: string
+        type:
+          type: integer
+        adminPass:
+          type: string
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputerAccount'
+        ports:
+          type: array
+          items:
+            type: integer
+        portsForCrack:
+          type: integer
+        traceTime:
+          type: number
+        admin:
+          $ref: '#/components/schemas/ComputerAdminInfo'
+        portRemap:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputerPortRemap'
+        tracker:
+          type: string
+        dlinks:
+          type: array
+          items:
+            type: string
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputerFile'
+      required:
+        - id
+        - name
+        - ip
+        - security
+        - icon
+    ComputerAccount:
+      title: ComputerAccount
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        type:
+          type: integer
+    ComputerAdminInfo:
+      title: ComputerAdminInfo
+      type: object
+      properties:
+        type:
+          type: string
+        resetPassword:
+          type: boolean
+        isSuper:
+          type: boolean
+    ComputerPortRemap:
+      title: ComputerPortRemap
+      type: object
+      properties:
+        type:
+          type: string
+        port:
+          type: integer
+    ComputerFile:
+      title: ComputerFile
+      type: object
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+        contents:
+          type: string
+      description: A single file intended to be placed onto a computer.
+    HN_Mission:
+      title: HN_Mission
+      type: object
+      x-tags:
+        - Mission Data
+      description: A mission for the player to complete.
+      properties:
+        id:
+          type: string
+        activeCheck:
+          type: boolean
+        shouldIgnoreSenderVerification:
+          type: boolean
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/HN_MissionGoal'
+        missionStart:
+          type: string
+        missionEnd:
+          type: string
+        nextMission:
+          $ref: '#/components/schemas/HN_Mission'
+        IsSilent:
+          type: boolean
+        branchMissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/HN_Mission'
+        email:
+          $ref: '#/components/schemas/HN_Email'
+        posting:
+          $ref: '#/components/schemas/HN_MissionPost'
+    HN_MissionGoal:
+      title: HN_MissionGoal
+      type: object
+      properties:
+        type:
+          type: integer
+        target:
+          type: string
+        file:
+          type: string
+        path:
+          type: string
+        keyword:
+          type: string
+        removal:
+          type: boolean
+        caseSensitive:
+          type: boolean
+        owner:
+          type: string
+        degree:
+          type: string
+        uni:
+          type: string
+        gpa:
+          type: string
+        mailServer:
+          type: string
+        recipient:
+          type: string
+        subject:
+          type: string
+      required:
+        - type
+      x-tags:
+        - Mission Data
+      description: A goal for a player to complete as part of a mission.
+    HN_Email:
+      title: HN_Email
+      type: object
+      properties:
+        sender:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/HN_EmailAttachment'
+      description: An email to be sent to the player in-game.
+    HN_EmailAttachment:
+      title: HN_EmailAttachment
+      type: object
+      properties:
+        type:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        comp:
+          type: string
+        user:
+          type: string
+        pass:
+          type: string
+    HN_MissionPost:
+      title: HN_MissionPost
+      type: object
+      description: A posting in a mission board.
+      properties:
+        title:
+          type: string
+        reqs:
+          type: string
+        requiredRank:
+          type: integer
+        content:
+          type: string
+      x-tags:
+        - Mission Data
+  securitySchemes: {}
