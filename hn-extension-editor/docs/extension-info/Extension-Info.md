@@ -26,7 +26,7 @@ Fetches information about an extension with the given ID, after verifying the us
 ```json http
 {
   "method": "get",
-  "url": "https://hn.lunasphere.co.uk/extensions/{id}"
+  "url": "https://hn.lunasphere.co.uk/api/extensions/{id}"
 }
 ```
 
@@ -35,7 +35,7 @@ Creates a brand new extension for the current user with uploaded information.
 ```json http
 {
   "method": "post",
-  "url": "https://hn.lunasphere.co.uk/extensions/new"
+  "url": "https://hn.lunasphere.co.uk/api/extensions/new"
 }
 ```
 
@@ -44,7 +44,7 @@ Updates an extension information with submitted new information under the specif
 ```json http
 {
   "method": "post",
-  "url": "https://hn.lunasphere.co.uk/extensions/update/{id}"
+  "url": "https://hn.lunasphere.co.uk/api/extensions/update/{id}"
 }
 ```
 
@@ -53,7 +53,7 @@ Deletes an Extension with the given ID.
 ```json http
 {
   "method": "delete",
-  "url": "https://hn.lunasphere.co.uk/extensions/delete/{id}"
+  "url": "https://hn.lunasphere.co.uk/api/extensions/delete/{id}"
 }
 ```
 *WARNING! This last method is highly destructive, and so it is recommended that a user be prompted for confirmation before proceeding.*

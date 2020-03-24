@@ -1,4 +1,4 @@
-CREATE TABLE "Extension_Info" (
+CREATE TABLE "extension_Info" (
   "extensionId" SERIAL PRIMARY KEY,
   "extensionName" text,
   "languageId" int,
@@ -15,19 +15,19 @@ CREATE TABLE "Extension_Info" (
   "workshop_id" text
 );
 
-CREATE TABLE "HN_Music" (
+CREATE TABLE "hn_Music" (
   "musicId" SERIAL PRIMARY KEY,
   "ownerId" int,
   "title" text
 );
 
-CREATE TABLE "HN_Theme" (
+CREATE TABLE "hn_Theme" (
   "themeId" SERIAL PRIMARY KEY,
   "ownerId" int,
   "meta" varchar
 );
 
-CREATE TABLE "HN_Mission" (
+CREATE TABLE "hn_Mission" (
   "missionId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "activeCheck" boolean,
@@ -40,7 +40,7 @@ CREATE TABLE "HN_Mission" (
   "postingId" int
 );
 
-CREATE TABLE "HN_CompNode" (
+CREATE TABLE "hn_CompNode" (
   "nodeId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "id" text,
@@ -57,17 +57,17 @@ CREATE TABLE "HN_CompNode" (
   "tracker" text
 );
 
-CREATE TABLE "LN_Starting_Comp" (
+CREATE TABLE "ln_Starting_Comp" (
   "extensionId" int,
   "nodeId" int
 );
 
-CREATE TABLE "HN_CompType" (
+CREATE TABLE "hn_CompType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "HN_CompFile" (
+CREATE TABLE "hn_CompFile" (
   "fileId" int,
   "extensionId" int,
   "path" text,
@@ -75,34 +75,34 @@ CREATE TABLE "HN_CompFile" (
   "contents" varchar
 );
 
-CREATE TABLE "LN_Comp_File" (
+CREATE TABLE "ln_Comp_File" (
   "nodeId" int,
   "fileId" int
 );
 
-CREATE TABLE "HN_Ports" (
+CREATE TABLE "hn_Ports" (
   "portId" SERIAL PRIMARY KEY,
   "port" int,
   "portType" text
 );
 
-CREATE TABLE "LN_Comp_Ports" (
+CREATE TABLE "ln_Comp_Ports" (
   "nodeId" int,
   "portId" int
 );
 
-CREATE TABLE "HN_PortRemap" (
+CREATE TABLE "hn_PortRemap" (
   "nodeId" int,
   "portType" text,
   "port" int
 );
 
-CREATE TABLE "HN_AdminType" (
+CREATE TABLE "hn_AdminType" (
   "adminTypeId" SERIAL PRIMARY KEY,
   "adminType" text
 );
 
-CREATE TABLE "HN_Admin" (
+CREATE TABLE "hn_Admin" (
   "adminId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "nodeId" int,
@@ -111,24 +111,24 @@ CREATE TABLE "HN_Admin" (
   "isSuper" boolean
 );
 
-CREATE TABLE "HN_Email" (
+CREATE TABLE "hn_Email" (
   "emailId" SERIAL PRIMARY KEY,
   "sender" text,
   "subject" text,
   "body" varchar
 );
 
-CREATE TABLE "LN_attachment_email" (
+CREATE TABLE "ln_attachment_email" (
   "emailId" int,
   "attachmentId" int
 );
 
-CREATE TABLE "HN_AttachmentType" (
+CREATE TABLE "hn_AttachmentType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "HN_EmailAttachment" (
+CREATE TABLE "hn_EmailAttachment" (
   "attachmentId" SERIAL PRIMARY KEY,
   "typeId" int,
   "content" text,
@@ -137,7 +137,7 @@ CREATE TABLE "HN_EmailAttachment" (
   "pass" text
 );
 
-CREATE TABLE "HN_BoardPost" (
+CREATE TABLE "hn_BoardPost" (
   "postingId" SERIAL PRIMARY KEY,
   "title" text,
   "reqs" text,
@@ -145,23 +145,23 @@ CREATE TABLE "HN_BoardPost" (
   "content" varchar
 );
 
-CREATE TABLE "HN_MissionBranch" (
+CREATE TABLE "hn_MissionBranch" (
   "branchId" SERIAL PRIMARY KEY,
   "missionId_1" int,
   "missionId_2" int
 );
 
-CREATE TABLE "HN_MGoalType" (
+CREATE TABLE "hn_MGoalType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "LN_Goal_Mission" (
+CREATE TABLE "ln_Goal_Mission" (
   "missionId" int,
   "goalId" int
 );
 
-CREATE TABLE "HN_MissionGoal" (
+CREATE TABLE "hn_MissionGoal" (
   "goalId" SERIAL PRIMARY KEY,
   "typeId" int,
   "file" text,
@@ -178,7 +178,7 @@ CREATE TABLE "HN_MissionGoal" (
   "subject" text
 );
 
-CREATE TABLE "User" (
+CREATE TABLE "user" (
   "userId" SERIAL PRIMARY KEY,
   "email" text,
   "username" text,
@@ -186,75 +186,75 @@ CREATE TABLE "User" (
   "salt" text
 );
 
-CREATE TABLE "User_Extension" (
+CREATE TABLE "user_Extension" (
   "userId" int,
   "extensionId" int
 );
 
-CREATE TABLE "Extension_Language" (
+CREATE TABLE "extension_Language" (
   "langId" SERIAL PRIMARY KEY,
   "lang" text,
   "Language" text
 );
 
-ALTER TABLE "User_Extension" ADD FOREIGN KEY ("userId") REFERENCES "User" ("userId");
+ALTER TABLE "user_Extension" ADD FOREIGN KEY ("userId") REFERENCES "user" ("userId");
 
-ALTER TABLE "User_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "Extension_Info" ("extensionId");
+ALTER TABLE "user_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 
-ALTER TABLE "Extension_Language" ADD FOREIGN KEY ("langId") REFERENCES "Extension_Info" ("languageId");
+ALTER TABLE "extension_Language" ADD FOREIGN KEY ("langId") REFERENCES "extension_Info" ("languageId");
 
-ALTER TABLE "HN_Theme" ADD FOREIGN KEY ("themeId") REFERENCES "Extension_Info" ("startingThemeId");
+ALTER TABLE "hn_Theme" ADD FOREIGN KEY ("themeId") REFERENCES "extension_Info" ("startingThemeId");
 
-ALTER TABLE "HN_Music" ADD FOREIGN KEY ("musicId") REFERENCES "Extension_Info" ("startingMusic");
+ALTER TABLE "hn_Music" ADD FOREIGN KEY ("musicId") REFERENCES "extension_Info" ("startingMusic");
 
-ALTER TABLE "HN_MGoalType" ADD FOREIGN KEY ("typeId") REFERENCES "HN_MissionGoal" ("typeId");
+ALTER TABLE "hn_MGoalType" ADD FOREIGN KEY ("typeId") REFERENCES "hn_MissionGoal" ("typeId");
 
-ALTER TABLE "LN_Goal_Mission" ADD FOREIGN KEY ("missionId") REFERENCES "HN_Mission" ("missionId");
+ALTER TABLE "ln_Goal_Mission" ADD FOREIGN KEY ("missionId") REFERENCES "hn_Mission" ("missionId");
 
-ALTER TABLE "LN_Goal_Mission" ADD FOREIGN KEY ("goalId") REFERENCES "HN_MissionGoal" ("goalId");
+ALTER TABLE "ln_Goal_Mission" ADD FOREIGN KEY ("goalId") REFERENCES "hn_MissionGoal" ("goalId");
 
-ALTER TABLE "HN_Mission" ADD FOREIGN KEY ("nextMission") REFERENCES "HN_Mission" ("missionId");
+ALTER TABLE "hn_Mission" ADD FOREIGN KEY ("nextMission") REFERENCES "hn_Mission" ("missionId");
 
-ALTER TABLE "HN_MissionBranch" ADD FOREIGN KEY ("missionId_1") REFERENCES "HN_Mission" ("missionId");
+ALTER TABLE "hn_MissionBranch" ADD FOREIGN KEY ("missionId_1") REFERENCES "hn_Mission" ("missionId");
 
-ALTER TABLE "HN_MissionBranch" ADD FOREIGN KEY ("missionId_2") REFERENCES "HN_Mission" ("missionId");
+ALTER TABLE "hn_MissionBranch" ADD FOREIGN KEY ("missionId_2") REFERENCES "hn_Mission" ("missionId");
 
-ALTER TABLE "LN_attachment_email" ADD FOREIGN KEY ("emailId") REFERENCES "HN_Email" ("emailId");
+ALTER TABLE "ln_attachment_email" ADD FOREIGN KEY ("emailId") REFERENCES "hn_Email" ("emailId");
 
-ALTER TABLE "HN_EmailAttachment" ADD FOREIGN KEY ("attachmentId") REFERENCES "LN_attachment_email" ("attachmentId");
+ALTER TABLE "hn_EmailAttachment" ADD FOREIGN KEY ("attachmentId") REFERENCES "ln_attachment_email" ("attachmentId");
 
-ALTER TABLE "HN_Email" ADD FOREIGN KEY ("emailId") REFERENCES "HN_Mission" ("emailId");
+ALTER TABLE "hn_Email" ADD FOREIGN KEY ("emailId") REFERENCES "hn_Mission" ("emailId");
 
-ALTER TABLE "HN_BoardPost" ADD FOREIGN KEY ("postingId") REFERENCES "HN_Mission" ("postingId");
+ALTER TABLE "hn_BoardPost" ADD FOREIGN KEY ("postingId") REFERENCES "hn_Mission" ("postingId");
 
-ALTER TABLE "HN_Mission" ADD FOREIGN KEY ("missionId") REFERENCES "Extension_Info" ("statingMissionId");
+ALTER TABLE "hn_Mission" ADD FOREIGN KEY ("missionId") REFERENCES "extension_Info" ("statingMissionId");
 
-ALTER TABLE "HN_AttachmentType" ADD FOREIGN KEY ("typeId") REFERENCES "HN_EmailAttachment" ("typeId");
+ALTER TABLE "hn_AttachmentType" ADD FOREIGN KEY ("typeId") REFERENCES "hn_EmailAttachment" ("typeId");
 
-ALTER TABLE "LN_Comp_File" ADD FOREIGN KEY ("nodeId") REFERENCES "HN_CompNode" ("nodeId");
+ALTER TABLE "ln_Comp_File" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
 
-ALTER TABLE "HN_CompFile" ADD FOREIGN KEY ("fileId") REFERENCES "LN_Comp_File" ("fileId");
+ALTER TABLE "hn_CompFile" ADD FOREIGN KEY ("fileId") REFERENCES "ln_Comp_File" ("fileId");
 
-ALTER TABLE "LN_Comp_Ports" ADD FOREIGN KEY ("nodeId") REFERENCES "HN_CompNode" ("nodeId");
+ALTER TABLE "ln_Comp_Ports" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
 
-ALTER TABLE "HN_Ports" ADD FOREIGN KEY ("portId") REFERENCES "LN_Comp_Ports" ("portId");
+ALTER TABLE "hn_Ports" ADD FOREIGN KEY ("portId") REFERENCES "ln_Comp_Ports" ("portId");
 
-ALTER TABLE "HN_PortRemap" ADD FOREIGN KEY ("nodeId") REFERENCES "HN_CompNode" ("nodeId");
+ALTER TABLE "hn_PortRemap" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
 
-ALTER TABLE "HN_Ports" ADD FOREIGN KEY ("portType") REFERENCES "HN_PortRemap" ("portType");
+ALTER TABLE "hn_Ports" ADD FOREIGN KEY ("portType") REFERENCES "hn_PortRemap" ("portType");
 
-ALTER TABLE "HN_CompNode" ADD FOREIGN KEY ("typeId") REFERENCES "HN_CompType" ("typeId");
+ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("typeId") REFERENCES "hn_CompType" ("typeId");
 
-ALTER TABLE "HN_CompNode" ADD FOREIGN KEY ("nodeId") REFERENCES "LN_Starting_Comp" ("nodeId");
+ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("nodeId") REFERENCES "ln_Starting_Comp" ("nodeId");
 
-ALTER TABLE "Extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "LN_Starting_Comp" ("extensionId");
+ALTER TABLE "extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "ln_Starting_Comp" ("extensionId");
 
-ALTER TABLE "HN_AdminType" ADD FOREIGN KEY ("adminTypeId") REFERENCES "HN_Admin" ("adminTypeId");
+ALTER TABLE "hn_AdminType" ADD FOREIGN KEY ("adminTypeId") REFERENCES "hn_Admin" ("adminTypeId");
 
-ALTER TABLE "HN_CompNode" ADD FOREIGN KEY ("nodeId") REFERENCES "HN_Admin" ("nodeId");
+ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_Admin" ("nodeId");
 
-ALTER TABLE "HN_Admin" ADD FOREIGN KEY ("extensionId") REFERENCES "Extension_Info" ("extensionId");
+ALTER TABLE "hn_Admin" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 
-ALTER TABLE "Extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "HN_Mission" ("extensionId");
+ALTER TABLE "extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "hn_Mission" ("extensionId");
 
-ALTER TABLE "Extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "HN_CompFile" ("extensionId");
+ALTER TABLE "extension_Info" ADD FOREIGN KEY ("extensionId") REFERENCES "hn_CompFile" ("extensionId");
