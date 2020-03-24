@@ -1,0 +1,34 @@
+{
+  "name": "hn_extensionstudio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Admiral-Joshua/HN_ExtensionStudio.git"
+  },
+  "keywords": [
+    "HackNet",
+    "Extensions",
+    "Hacknet",
+    "Extension",
+    "Editor",
+    "Studio"
+  ],
+  "author": "Lunasphere Entertainment",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Admiral-Joshua/HN_ExtensionStudio/issues"
+  },
+  "homepage": "https://hn.lunasphere.co.uk",
+  "devDependencies": {
+    "@types/node": "^13.9.3",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
