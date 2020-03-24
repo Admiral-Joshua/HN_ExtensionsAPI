@@ -310,6 +310,7 @@ components:
       required:
         - name
         - language
+      description: ''
     ComputerNode:
       title: ComputerNode
       type: object
