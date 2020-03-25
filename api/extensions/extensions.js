@@ -10,7 +10,7 @@ router.get('/:id', (req, res) => {
         if (extId) {
 
             knex('extension_Info')
-                .where({extensionId: extId})
+                .where({ extensionId: extId })
                 .limit(1)
                 .then(rows => {
                     if (rows.length >= 1) {
@@ -20,7 +20,7 @@ router.get('/:id', (req, res) => {
                         res.send('<h2>404 - Not Found</h2>');
                     }
                 });
-                
+
 
         } else {
             // 404 - Extension not specified.
@@ -32,7 +32,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/new', (req, res) => {
     let knex = req.app.get('db');
-    
+
     let extInfo = req.body;
 
     //TODO: perform validation
@@ -46,6 +46,40 @@ router.post('/new', (req, res) => {
             extInfo.extensionId = ids[0];
             res.json(extInfo);
         });
+});
+
+router.delete('/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let extId = req.params.id;
+
+    if (extId) {
+        knex("user_Extension")
+            .where('extensionId', extId)
+            .select('userId')
+            .then(row => {
+
+                // TODO: MY AUTHENTICATED USER ID
+                if (row[0].userId === 1) {
+
+                    knex("user_Extension")
+                        .del()
+                        .where('extensionId', extId)
+                        .then(() => {
+                            knex
+                                .del()
+                                .from('extension_Info')
+                                .where('extensionId', extId)
+                                .then(() => {
+                                    res.sendStatus(204);
+                                });
+                        });
+                }
+            });
+    } else {
+        res.status(404);
+        res.send('<h2>404 - Not Found</h2>')
+    }
 });
 
 module.exports = router;
