@@ -6,7 +6,7 @@ CREATE TABLE "extension_Info" (
   "description" varchar,
   "startingThemeId" int,
   "startingMusic" int,
-  "statingMissionId" int,
+  "startingMissionId" int,
   "workshop_description" varchar,
   "workshop_language" text,
   "workshop_visibility" int,
