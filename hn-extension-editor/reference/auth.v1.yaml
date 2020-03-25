@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  title: auth.v1
+  version: '1.0'
+  contact:
+    name: Joshua Richardson-Noyes
+    url: lunasphere.co.uk/contact
+    email: admiral-joshua@lunasphere.co.uk
+  license:
+    name: UNLICENSED
+  description: Authentication API used by the entire Lunasphere suite to create/login/delete accounts.
+servers:
+  - url: 'http://lunasphere.co.uk/api'
+    description: Production
+  - url: 'http://localhost/api'
+    description: Development
+paths:
+  /auth/login:
+    post:
+      summary: ''
+      operationId: post-auth-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOPResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOPResponse'
+      description: Attempt login with the credentials submitted in the body.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAccount'
+      tags:
+        - Authentication
+  /auth/register:
+    parameters: []
+    post:
+      summary: ''
+      operationId: post-auth-register
+      responses:
+        '204':
+          description: Registration Successful
+          headers: {}
+        '400':
+          description: Bad Request - Invalid / incorrect information supplied.
+      description: Create an account with the specified details.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAccount'
+        description: ''
+      tags:
+        - Authentication
+  /auth/delete:
+    parameters: []
+    delete:
+      summary: ''
+      operationId: delete-auth-delete
+      responses:
+        '204':
+          description: Deletion Successful
+          headers: {}
+        '500':
+          description: Deletion Failed
+      description: Deletes the currently authenticated user account.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: JSON Web Token
+      tags:
+        - Authentication
+  /auth/update:
+    parameters: []
+    post:
+      summary: Update Account Information
+      operationId: post-auth-update
+      responses:
+        '200':
+          description: Update Successful
+      description: Used to update the currently authenticated account with posted information.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: |
+            JSON Web Token
+      tags:
+        - Authentication
+  /auth/info:
+    get:
+      summary: Current User Information
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccount'
+      operationId: get-auth-info
+      description: Get information about the currently authenticated user.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: JSON Web Token
+components:
+  schemas:
+    UserOPResponse:
+      title: UserOPResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        msg:
+          type: string
+        token:
+          type: string
+      required:
+        - success
+      x-tags:
+        - Authentication
+    UserAccount:
+      title: UserAccount
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        salt:
+          type: string
+      required:
+        - username
+        - password
+      x-tags:
+        - Authentication
+  securitySchemes: {}
+tags:
+  - name: Authentication
+    description: Operations and models used for authentication and authorization of a Lunasphere account.

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: api
+  title: Extensions API
   version: '1.0'
   description: A set of RESTful API urls to be used for creation of and editing Hacknet Extensions.
   license:
