@@ -2,21 +2,21 @@
 const express = require("express");
 const knex = require("knex");
 const bodyParser = require("body-parser");
+const fileUpload = require("express-fileupload");
 const jwt = require("express-jwt");
+const cookieParser = require("cookie-parser");
 
 // Import back-end API code.
 const API = require("./api/api");
 
 // Load up config files
-// DB Config
-const dbConf = require("./conf/dbconn.json");
-// Security Configuration
-const conf = require("./conf/security.json");
+// Application Configuration
+const config = require("./config.json");
 
 // Initialise SQL-Builder with Database Details.
 const db = knex({
     client: "pg",
-    connection: `postgres://${dbConf.user}:${dbConf.pass}@${dbConf.host}:${dbConf.port}/${dbConf.schema}`
+    connection: `postgres://${config.db.user}:${config.db.pass}@${config.db.host}:${config.db.port}/${config.db.schema}`
 });
 
 const app = express();
@@ -27,9 +27,17 @@ app.set('db', db);
 // Parse POST body data.
 app.use(bodyParser());
 
+// Parse Cookie Data from the client
+app.use(cookieParser());
+
+// Parse file uploads
+app.use(fileUpload({
+    limits: {fileSize: 5 * 1024 * 1024} // Limit to 5MB
+}));
+
 // Authorization - Don't let non-authenticated users work on extensions.
 app.use(jwt({
-    secret: conf.authSecret
+    secret: config.security.secret
 }))
 
 // App Handler in the event the user has not yet authenticated

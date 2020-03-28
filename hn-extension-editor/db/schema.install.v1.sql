@@ -179,13 +179,13 @@ CREATE TABLE "hn_MissionGoal" (
   "subject" text
 );
 
-CREATE TABLE "user" (
-  "userId" SERIAL PRIMARY KEY,
-  "email" text,
-  "username" text,
-  "password" varchar,
-  "salt" text
-);
+-- CREATE TABLE "user" (
+--  "userId" SERIAL PRIMARY KEY,
+--  "email" text,
+--  "username" text,
+--  "password" varchar,
+--  "salt" text
+--);
 
 CREATE TABLE "user_Extension" (
   "userId" int,
