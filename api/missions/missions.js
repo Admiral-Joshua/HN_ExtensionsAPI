@@ -8,6 +8,10 @@ router.use('/emails', require("./emails/email"));
 // Management and editing of in-game mission board posts.
 router.use('/postings', require("./postings/postings"));
 
+// Goals API
+// Management and editing of mission goals.
+router.use('/goals', require("./goals/goals"));
+
 // GET
 // '/linkEmail?email=<id>&mission=<id>'
 // Links the specified email up with the specified mission
