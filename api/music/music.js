@@ -90,22 +90,33 @@ router.get('/play/:id', (req, res) => {
 router.post('/new', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
+    let root = req.app.get('path');
 
     let trackInfo = req.body;
     let trackFile = req.files.track;
 
     // TODO: Validate Track Info.
 
-    knex("hn_Music")
-        .insert({ ownerId: user.userId, title: trackInfo.title })
-        .returning("musicId")
-        .then(ids => {
-            trackInfo.musicId = ids[0];
-            res.json(trackInfo);
+    // Check if user directory exists.
+    var PATH = `${root}/user_data/${user.userId}`;
+    if (!fs.existsSync(PATH)) {
+        fs.mkdirSync(PATH);
+    }
 
-            // TODO: Transfer the music data to a user folder.
-            // E.g. trackFile.mv(<TARGET_PATH>)
-        });
+    // Proceed to move the uploaded audio file into the user's directory.
+    trackFile.mv(`${PATH}/${trackFile.name}`, (err) => {
+        if (err) { res.sendStatus(500); return; }
+
+        knex("hn_Music")
+            .insert({ ownerId: user.userId, title: trackInfo.title })
+            .returning("musicId")
+            .then(ids => {
+                trackInfo.musicId = ids[0];
+                res.json(trackInfo);
+            });
+    });
+
+
 });
 
 // PUT
