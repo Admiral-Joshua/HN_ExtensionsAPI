@@ -241,6 +241,7 @@ router.put('/:id', (req, res) => {
 // DELETE
 // '/:id'
 // Deletes mission whose ID matches the one specified.
+// Cascades to delete email, posting and goals.
 router.delete('/:id', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
@@ -252,8 +253,41 @@ router.delete('/:id', (req, res) => {
     if (missionId && !isNaN(missionId)) {
         knex("hn_Mission")
             .where({ missionId: missionId, extensionId: currentExtension })
-            .del();
+            .first()
+            .then(missionInfo => {
 
+                // Delete all goal links
+                knex("ln_Goal_Mission")
+                    .where({ missionId: missionId })
+                    .then(() => {
+
+                        // Does this mission have an email link?
+                        if (missionInfo.emailId && missionInfo.emailId > 0) {
+                            knex("hn_Email")
+                                .where({ emailId: missionInfo.emailId })
+                                .del()
+                                .then(() => {
+
+                                    // Does this mission have a board posting link?
+                                    if (missionInfo.postingId && missionInfo.postingId > 0) {
+                                        knex("hn_BoardPost")
+                                            .where({ postingId: missionInfo.postingId })
+                                            .del()
+                                            .then(() => {
+
+                                                // Now delete the actual mission
+                                                knex("hn_Mission")
+                                                    .where({ missionId: missionId, extensionId: currentExtension })
+                                                    .del()
+                                                    .then(() => {
+                                                        res.sendStatus(204);
+                                                    });
+                                            });
+                                    }
+                                });
+                        }
+                    });
+            });
     } else {
         res.status(400);
         res.send("<h2>Invalid or unspecified Mission ID.</h2>");
