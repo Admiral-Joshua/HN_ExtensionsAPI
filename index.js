@@ -23,6 +23,7 @@ const app = express();
 
 // Push SQL-Builder to app so it can be utilised throughout the project.
 app.set('db', db);
+app.set('path', `${__dirname}`);
 
 // Parse POST body data.
 app.use(bodyParser());
@@ -32,7 +33,7 @@ app.use(cookieParser());
 
 // Parse file uploads
 app.use(fileUpload({
-    limits: {fileSize: 5 * 1024 * 1024} // Limit to 5MB
+    limits: { fileSize: 5 * 1024 * 1024 } // Limit to 5MB
 }));
 
 // Authorization - Don't let non-authenticated users work on extensions.
@@ -45,7 +46,7 @@ app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
         // TODO: Redirect to Lunasphere login page.
         res.status(401);
-        res.send("<h2>Unauthorised</h2>");
+        res.send("<h2>Not currently logged in, or credentials have expired.</h2>");
     }
 })
 

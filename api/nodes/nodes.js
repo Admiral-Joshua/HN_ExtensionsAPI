@@ -1,5 +1,10 @@
 const router = require("express").Router();
 
+
+router.use('/admins', require("./admins"));
+router.use('/files', require("./files"));
+router.use('/ports', require("./ports"));
+
 // GET
 // '/list'
 // Lists all defined Computers for the currently being edited Hacknet Extension.
@@ -12,8 +17,8 @@ router.get('/list', (req, res) => {
     if (currentExtension) {
         knex("hn_CompNode")
             .select('nodeId', 'id', 'name', 'ip', 'typeText')
-            .where({extensionId: currentExtension})
-            .join('hn_CompType', {'hn_CompNode.typeId': 'hn_CompType.typeId'})
+            .where({ extensionId: currentExtension })
+            .join('hn_CompType', { 'hn_CompNode.typeId': 'hn_CompType.typeId' })
             .then(rows => {
                 res.json(rows);
             });
@@ -26,33 +31,99 @@ router.get('/list', (req, res) => {
 
 // GET
 // '/:id'
-// Fetches detailed information for the node with given ID.
-//  Will also check what Extension Id the user is editing to preent tampering other people's extensions.
+// Retreives detailed information about the computer with given ID.
 router.get('/:id', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
 
-    let targetNodeId = req.params.id;
-    let currentExtension = req.cookies.extId;
-    
-    if (currentExtension && targetNodeId) {
+    let extensionId = req.cookies.extId;
+    let nodeId = parseInt(req.params.id);
 
+    if (nodeId && !isNaN(nodeId)) {
         knex("hn_CompNode")
-            .where({nodeId: targetNodeId, extensionId: currentExtension})
+            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker')
+            .where({ 'nodeId': nodeId })
             .first()
-            .then(row => {
-                if (row)
-                    res.json(row);
-                else
-                    res.sendStatus(404);
-            });
+            .then(nodeInfo => {
 
-        return;
+                if (nodeInfo) {
+                    res.json(nodeInfo);
+                } else {
+                    res.status(404);
+                    res.send("<h2>Computer Node does not exist.</h2>")
+                }
+            });
+    } else {
+        res.sendStatus(400);
     }
 
-    res.sendStatus(400);
 });
 
+// POST
+// '/new'
+// Create new Computer Node with the specified information
+router.post('/new', (req, res) => {
+    let knex = req.app.get('db');
+    let user = req.user;
 
+    let currentExtension = req.cookies.extId;
+
+    let nodeInfo = req.body;
+
+    if (currentExtension) {
+        // TODO: Confirm this user allowed to access this extension.
+
+        knex("hn_CompNode")
+            .insert({
+                extensionId: currentExtension,
+                id: nodeInfo.id,
+                name: nodeInfo.name,
+                ip: nodeInfo.ip,
+                securityLevel: nodeInfo.securityLevel,
+                allowsDefaultBootModule: nodeInfo.allowsDefaultBootModule,
+                icon: nodeInfo.icon,
+                typeId: nodeInfo.typeId,
+                adminPass: nodeInfo.adminPass,
+                portsForCrack: nodeInfo.portsForCrack,
+                traceTime: nodeInfo.traceTime,
+                adminInfoId: nodeInfo.adminInfoId,
+                tracker: nodeInfo.tracker
+            })
+            .returning("nodeId")
+            .then(ids => {
+                if (ids.length > 0) {
+                    nodeInfo.nodeId = ids[0];
+
+                    // Create port links
+                    var portLinks = [];
+                    nodeInfo.ports.forEach(port => {
+                        portLinks.push({ nodeId: nodeInfo.nodeId, portId: port.portId });
+                    });
+
+                    // Create file links
+                    var fileLinks = [];
+                    nodeInfo.files.forEach(file => {
+                        fileLinks.push({ nodeId: nodeInfo.nodeId, fileId: file.fileId });
+                    });
+
+                    knex("ln_Comp_Ports")
+                        .insert(portLinks)
+                        .then(() => {
+
+                            knex("ln_Comp_File")
+                                .insert(fileLinks)
+                                .then(() => {
+                                    res.json(nodeInfo);
+                                });
+                        });
+
+                } else {
+                    res.sendStatus(500);
+                }
+            })
+    } else {
+        res.sendStatus(400);
+    }
+});
 
 module.exports = router;

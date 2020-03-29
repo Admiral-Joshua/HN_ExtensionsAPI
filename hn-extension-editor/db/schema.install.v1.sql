@@ -106,7 +106,7 @@ CREATE TABLE "hn_AdminType" (
 CREATE TABLE "hn_Admin" (
   "adminId" SERIAL PRIMARY KEY,
   "extensionId" int,
-  "nodeId" int,
+  -- "nodeId" int,
   "adminTypeId" int,
   "resetPassword" boolean,
   "isSuper" boolean
@@ -250,7 +250,9 @@ ALTER TABLE "ln_Starting_Comp" ADD FOREIGN KEY ("extensionId") REFERENCES "exten
 
 ALTER TABLE "hn_Admin" ADD FOREIGN KEY ("adminTypeId") REFERENCES "hn_AdminType" ("adminTypeId");
 
-ALTER TABLE "hn_Admin" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
+-- ALTER TABLE "hn_Admin" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
+
+ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("adminInfoId") REFERENCES "hn_Admin" ("adminId");
 
 ALTER TABLE "hn_Admin" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 

@@ -12,7 +12,17 @@ INSERT INTO "hn_Music" ("musicId", "ownerId", "title") VALUES
 (8, 0, 'Irritations'),
 (9, 0, 'Broken_Boy'),
 (10, 0, 'Ryan10'),
-(11, 0, 'tetrameth') ON CONFLICT ("musicId") DO NOTHING;
+(11, 0, 'tetrameth'),
+(12, 0, 'DreamHead'),
+(13, 0, 'HOME_Resonance'),
+(14, 0, 'Remi_Finale'),
+(15, 0, 'Remi2'),
+(16, 0, 'RemiDrone'),
+(17, 0, 'Slow_Motion'),
+(18, 0, 'snidelyWhiplash'),
+(19, 0, 'Uberspacelike'),
+(20, 0, 'World_Chase')
+ON CONFLICT ("musicId") DO NOTHING;
 -- TODO: ADD DLC_Music tracks
 
 -- hn_MGoalType
@@ -73,4 +83,11 @@ INSERT INTO "hn_AdminType" ("adminTypeId", "adminType") VALUES
 (1, 'basic'),
 (2, 'progress'),
 (3, 'fast'),
-(4, 'none');
+(4, 'none') ON CONFLICT ("adminTypeId") DO NOTHING;
+
+-- hn_AttachmentType
+-- Types of attachments available for an email.
+INSERT INTO "hn_AttachmentType" ("typeId", "typeText") VALUES
+(1, 'note'),
+(2, 'link'),
+(3, 'account') ON CONFLICT ("typeId") DO NOTHING;
