@@ -56,7 +56,7 @@ app.use((err, req, res, next) => {
         res.status(401);
         res.send("<h2>Not currently logged in, or credentials have expired.</h2>");
     }
-})
+});
 
 // Setup API url.
 app.use('/api', API);
