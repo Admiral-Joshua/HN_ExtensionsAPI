@@ -4,6 +4,7 @@ const knex = require("knex");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const jwt = require("express-jwt");
+const fs = require("fs");
 const cookieParser = require("cookie-parser");
 
 // Import back-end API code.
@@ -17,6 +18,13 @@ const config = require("./config.json");
 const db = knex({
     client: "pg",
     connection: `postgres://${config.db.user}:${config.db.pass}@${config.db.host}:${config.db.port}/${config.db.schema}`
+});
+
+// Initialise user_data directory
+fs.exists(`${__dirname}/user_data`, (exists) => {
+    if (!exists) {
+        fs.mkdir(`${__dirname}/user_data`);
+    }
 });
 
 const app = express();
