@@ -91,3 +91,30 @@ INSERT INTO "hn_AttachmentType" ("typeId", "typeText") VALUES
 (1, 'note'),
 (2, 'link'),
 (3, 'account') ON CONFLICT ("typeId") DO NOTHING;
+
+-- hn_ActionType
+-- Types of possible actions
+INSERT INTO "hn_ActionType" ("typeId", "typeText") VALUES
+(1, 'Run Function'),
+(2, 'Load Mission'),
+(3, 'Add Asset'),
+(4, 'Copy Asset'),
+(5, 'Add Mission To Hub'),
+(6, 'Remove Mission From Hub'),
+(7, 'Add Thread To Board'),
+(8, 'Add IRC Message'),
+(9, 'Crash Computer'),
+(10, 'Delete File'),
+(11, 'Add Conditional Actions'),
+(12, 'Launch Hack Script'),
+(13, 'Switch To Theme'),
+(14, 'Start Screen Bleed Effect'),
+(15, 'Cancel Screen Bleed Effect'),
+(16, 'Append To File'),
+(17, 'Kill Exe'),
+(18, 'Change Alert Icon'),
+(19, 'Hide Node'),
+(20, 'Give Player User Account'),
+(21, 'Change IP'),
+(22, 'Change NetMap Sort'),
+(23, 'Save Game') ON CONFLICT ("typeId") DO NOTHING;
