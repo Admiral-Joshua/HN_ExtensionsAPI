@@ -1,4 +1,4 @@
-CREATE TABLE "extension_Info" (
+CREATE TABLE IF NOT EXISTS "extension_Info" (
   "extensionId" SERIAL PRIMARY KEY,
   "extensionName" text,
   "languageId" int,
@@ -15,22 +15,23 @@ CREATE TABLE "extension_Info" (
   "workshop_id" text
 );
 
-CREATE TABLE "hn_Music" (
+CREATE TABLE IF NOT EXISTS "hn_Music" (
   "musicId" SERIAL PRIMARY KEY,
   "ownerId" int,
   "title" text
 );
 
-CREATE TABLE "hn_Theme" (
+CREATE TABLE IF NOT EXISTS "hn_Theme" (
   "themeId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "ownerId" int,
   "meta" varchar
 );
 
-CREATE TABLE "hn_Mission" (
+CREATE TABLE IF NOT EXISTS "hn_Mission" (
   "missionId" SERIAL PRIMARY KEY,
   "extensionId" int,
+  "id" text,
   "activeCheck" boolean,
   "shouldIgnoreSenderVerification" boolean,
   "missionStart" text,
@@ -41,7 +42,7 @@ CREATE TABLE "hn_Mission" (
   "postingId" int
 );
 
-CREATE TABLE "hn_CompNode" (
+CREATE TABLE IF NOT EXISTS "hn_CompNode" (
   "nodeId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "id" text,
@@ -58,17 +59,17 @@ CREATE TABLE "hn_CompNode" (
   "tracker" text
 );
 
-CREATE TABLE "ln_Starting_Comp" (
+CREATE TABLE IF NOT EXISTS "ln_Starting_Comp" (
   "extensionId" int,
   "nodeId" int
 );
 
-CREATE TABLE "hn_CompType" (
+CREATE TABLE IF NOT EXISTS "hn_CompType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "hn_CompFile" (
+CREATE TABLE IF NOT EXISTS "hn_CompFile" (
   "fileId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "path" text,
@@ -76,34 +77,34 @@ CREATE TABLE "hn_CompFile" (
   "contents" varchar
 );
 
-CREATE TABLE "ln_Comp_File" (
+CREATE TABLE IF NOT EXISTS "ln_Comp_File" (
   "nodeId" int,
   "fileId" int
 );
 
-CREATE TABLE "hn_Ports" (
+CREATE TABLE IF NOT EXISTS "hn_Ports" (
   "portId" SERIAL PRIMARY KEY,
   "port" int,
   "portType" text
 );
 
-CREATE TABLE "ln_Comp_Ports" (
+CREATE TABLE IF NOT EXISTS "ln_Comp_Ports" (
   "nodeId" int,
   "portId" int
 );
 
-CREATE TABLE "hn_PortRemap" (
+CREATE TABLE IF NOT EXISTS "hn_PortRemap" (
   "nodeId" int,
   "portId" int,
   "port" int
 );
 
-CREATE TABLE "hn_AdminType" (
+CREATE TABLE IF NOT EXISTS "hn_AdminType" (
   "adminTypeId" SERIAL PRIMARY KEY,
   "adminType" text
 );
 
-CREATE TABLE "hn_Admin" (
+CREATE TABLE IF NOT EXISTS "hn_Admin" (
   "adminId" SERIAL PRIMARY KEY,
   "extensionId" int,
   -- "nodeId" int,
@@ -112,24 +113,24 @@ CREATE TABLE "hn_Admin" (
   "isSuper" boolean
 );
 
-CREATE TABLE "hn_Email" (
+CREATE TABLE IF NOT EXISTS "hn_Email" (
   "emailId" SERIAL PRIMARY KEY,
   "sender" text,
   "subject" text,
   "body" varchar
 );
 
-CREATE TABLE "ln_attachment_email" (
+CREATE TABLE IF NOT EXISTS "ln_attachment_email" (
   "emailId" int,
   "attachmentId" int
 );
 
-CREATE TABLE "hn_AttachmentType" (
+CREATE TABLE IF NOT EXISTS "hn_AttachmentType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "hn_EmailAttachment" (
+CREATE TABLE IF NOT EXISTS "hn_EmailAttachment" (
   "attachmentId" SERIAL PRIMARY KEY,
   "typeId" int,
   "content" text,
@@ -138,7 +139,7 @@ CREATE TABLE "hn_EmailAttachment" (
   "pass" text
 );
 
-CREATE TABLE "hn_BoardPost" (
+CREATE TABLE IF NOT EXISTS "hn_BoardPost" (
   "postingId" SERIAL PRIMARY KEY,
   "title" text,
   "reqs" text,
@@ -146,25 +147,26 @@ CREATE TABLE "hn_BoardPost" (
   "content" varchar
 );
 
-CREATE TABLE "hn_MissionBranch" (
+CREATE TABLE IF NOT EXISTS "hn_MissionBranch" (
   "branchId" SERIAL PRIMARY KEY,
   "missionId_1" int,
   "missionId_2" int
 );
 
-CREATE TABLE "hn_MGoalType" (
+CREATE TABLE IF NOT EXISTS "hn_MGoalType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "ln_Goal_Mission" (
+CREATE TABLE IF NOT EXISTS "ln_Goal_Mission" (
   "missionId" int,
   "goalId" int
 );
 
-CREATE TABLE "hn_MissionGoal" (
+CREATE TABLE IF NOT EXISTS "hn_MissionGoal" (
   "goalId" SERIAL PRIMARY KEY,
   "typeId" int,
+  "targetNodeId" int,
   "file" text,
   "path" text,
   "keyword" text,
@@ -179,7 +181,7 @@ CREATE TABLE "hn_MissionGoal" (
   "subject" text
 );
 
-CREATE TABLE "hn_Faction" (
+CREATE TABLE IF NOT EXISTS "hn_Faction" (
   "factionId" SERIAL PRIMARY KEY,
   "extensionId" int,
   "name" text,
@@ -188,17 +190,17 @@ CREATE TABLE "hn_Faction" (
   "actionSetId" int
 );
 
-CREATE TABLE "hn_ActionType" (
+CREATE TABLE IF NOT EXISTS "hn_ActionType" (
   "typeId" SERIAL PRIMARY KEY,
   "typeText" text
 );
 
-CREATE TABLE "hn_ActionSet" (
+CREATE TABLE IF NOT EXISTS "hn_ActionSet" (
   "actionSetId" SERIAL PRIMARY KEY,
   "name" text
 );
 
-CREATE TABLE "hn_Action" (
+CREATE TABLE IF NOT EXISTS "hn_Action" (
   "actionId" SERIAL PRIMARY KEY,
   "typeId" int,
   "loadActionSetId" int,
@@ -213,49 +215,54 @@ CREATE TABLE "hn_Action" (
   "functionValue" text
 );
 
-CREATE TABLE "hn_Function" (
+CREATE TABLE IF NOT EXISTS "hn_Function" (
   "functionId" SERIAL PRIMARY KEY,
   "funcDisplayName" text,
   "funcName" text
 );
 
-CREATE TABLE "LN_action_reqs" (
+CREATE TABLE IF NOT EXISTS "LN_action_reqs" (
     "actionSetId" int,
     "requirementId" int
 );
 
-CREATE TABLE "LN_action_set" (
+CREATE TABLE IF NOT EXISTS "LN_action_set" (
     "actionSetId" int,
     "actionId" int
 );
 
-CREATE TABLE "hn_ActionRequirement" (
+CREATE TABLE IF NOT EXISTS "hn_ActionRequirement" (
   "requirementId" SERIAL PRIMARY KEY,
   "flag" text,
   "value" int
 );
 
-CREATE TABLE "user_Extension" (
+CREATE TABLE IF NOT EXISTS "user_Extension" (
   "userId" int,
   "extensionId" int
 );
 
-CREATE TABLE "extension_Language" (
+CREATE TABLE IF NOT EXISTS "extension_Language" (
   "langId" SERIAL PRIMARY KEY,
   "lang" text,
   "Language" text
 );
 
-CREATE TABLE "hn_ircMessage" (
+CREATE TABLE IF NOT EXISTS "hn_ircMessage" (
 	"ircMessageId" SERIAL PRIMARY KEY,
 	"authorId" int,
 	"message" varchar
 );
 
-CREATE TABLE "hn_ircUser" (
+CREATE TABLE IF NOT EXISTS "hn_ircUser" (
 	"ircUserId" SERIAL PRIMARY KEY,
 	"nodeId" int,
 	"displayName" text
+);
+
+CREATE TABLE IF NOT EXISTS "ln_Comp_Dlink" (
+	"srcNodeId" int,
+	"destNodeId" int
 );
 
 ALTER TABLE "user_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
@@ -294,6 +301,10 @@ ALTER TABLE "hn_PortRemap" ADD FOREIGN KEY ("portId") REFERENCES "hn_Ports" ("po
 
 ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("typeId") REFERENCES "hn_CompType" ("typeId");
 ALTER TABLE "hn_CompNode" ADD FOREIGN KEY ("adminInfoId") REFERENCES "hn_Admin" ("adminId");
+
+ALTER TABLE "ln_Comp_Dlink" ADD FOREIGN KEY ("srcNodeId") REFERENCES "hn_CompNode" ("nodeId");
+ALTER TABLE "ln_Comp_Dlink" ADD FOREIGN KEY ("destNodeId") REFERENCES "hn_CompNode" ("nodeId");
+ALTER TABLE "ln_Comp_Dlink" ADD CONSTRAINT dlink_unique UNIQUE ("srcNodeId", "destNodeId");
 
 ALTER TABLE "ln_Starting_Comp" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");
 ALTER TABLE "ln_Starting_Comp" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
