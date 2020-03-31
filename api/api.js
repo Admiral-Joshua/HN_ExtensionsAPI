@@ -2,6 +2,8 @@ const router = require("express").Router();
 
 const extensionsAPI = require("./extensions/extensions");
 
+router.use('/builder', require("./builder/builder"));
+
 // Extensions Router
 // Used for fetching and manipulating extension info
 router.use('/extensions', extensionsAPI);

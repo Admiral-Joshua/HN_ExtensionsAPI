@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 // Attachments API
 // Used for management editing of attachments for an email.
-router.use('/attachments', require("./attachments"));
+router.use('/attachment', require("./attachment"));
 
 // GET
 // '/:id'
@@ -11,13 +11,13 @@ router.get('/:id', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
 
-    let currentExtension = req.cookies.extensionId;
+    //let currentExtension = req.cookies.extId;
 
     let emailId = parseInt(req.params.id);
 
     if (emailId && !isNaN(emailId)) {
         knex("hn_Email")
-            .where({ emailId: emailId, extensionId: currentExtension })
+            .where({ emailId: emailId })
             .first()
             .then(email => {
                 if (email) {

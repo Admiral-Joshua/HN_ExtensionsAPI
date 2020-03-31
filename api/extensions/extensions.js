@@ -22,8 +22,8 @@ router.get('/list', (req, res) => {
 
     knex("user_Extension")
         .select('extension_Info.extensionId', 'extensionName', 'description')
-        .where({userId: user.userId})
-        .join('extension_Info', {'user_Extension.extensionId' : 'extension_Info.extensionId'})
+        .where({ userId: user.userId })
+        .join('extension_Info', { 'user_Extension.extensionId': 'extension_Info.extensionId' })
         .then(rows => {
             res.json(rows);
         });
@@ -79,7 +79,16 @@ router.post('/new', (req, res) => {
         .into("extension_Info")
         .then(ids => {
             extInfo.extensionId = ids[0];
-            res.json(extInfo);
+
+            // Add link to this user.
+            knex("user_Extension")
+                .insert({
+                    extensionId: extInfo.extensionId,
+                    userId: req.user.userId
+                })
+                .then(() => {
+                    res.json(extInfo);
+                });
         });
 });
 

@@ -13,6 +13,97 @@ router.get('/all', (req, res) => {
         });
 });
 
+// PUT
+// '/remap'
+// Remaps a specified port (if exists) to another number - for the specified computer node
+router.put('/remap', (req, res) => {
+    let knex = req.app.get('db');
+
+    let srcPortId = parseInt(req.body.portId);
+    let destPort = parseInt(req.body.port);
+    let nodeId = parseInt(req.body.nodeId);
+
+    // Validate
+    if (isNaN(srcPortId)) {
+        res.status(400);
+        res.send("<h2>Source Port ID not specified or invalid.</h2>");
+    } else if (isNaN(destPort)) {
+        res.status(400);
+        res.send("<h2>Destination Port not specified or invalid.</h2>");
+    } else if (isNaN(nodeId)) {
+        res.status(400);
+        res.send("<h2>Computer ID not specified or invalid.</h2>");
+    } else {
+
+        // Check specified port actually exists
+        knex("hn_Ports")
+            .where({ portId: srcPortId })
+            .then(rows => {
+                if (rows.length === 0) {
+                    res.status(400);
+                    res.send("<h2>Port ID specified does not exist or is invalid.</h2>");
+                } else {
+                    // Check if this mapping already exists
+                    knex("hn_PortRemap")
+                        .where({
+                            nodeId: nodeId,
+                            portId: req.body.portId
+                        })
+                        .then(rows => {
+                            if (rows.length !== 0) {
+                                // Already done, return success anyway.
+                                res.sendStatus(204);
+                            } else {
+                                knex("hn_PortRemap")
+                                    .insert({
+                                        nodeId: nodeId,
+                                        portId: req.body.portId,
+                                        port: destPort
+                                    })
+                                    .then(() => {
+                                        res.sendStatus(204);
+                                    });
+                            }
+                        });
+                }
+            });
+    }
+});
+
+// DELETE
+// '/remap'
+// Deletes a port remapping that matches specified information
+router.delete('/remap', (req, res) => {
+    let knex = req.app.get('db');
+
+    let srcPortId = parseInt(req.body.portId);
+    let destPort = parseInt(req.body.port);
+    let nodeId = parseInt(req.body.nodeId);
+
+    // Validate
+    if (isNaN(srcPortId)) {
+        res.status(400);
+        res.send("<h2>Source Port ID not specified or invalid.</h2>");
+    } else if (isNaN(destPort)) {
+        res.status(400);
+        res.send("<h2>Destination Port not specified or invalid.</h2>");
+    } else if (isNaN(nodeId)) {
+        res.status(400);
+        res.send("<h2>Computer ID not specified or invalid.</h2>");
+    } else {
+        knex("hn_PortRemap")
+            .where({
+                nodeId: nodeId,
+                portId: srcPortId,
+                port: destPort
+            })
+            .del()
+            .then(() => {
+                res.sendStatus(204);
+            });
+    }
+});
+
 // GET
 // '/list/:id'
 // Retrieves list of ports plus any remaps for a computer node with given ID.

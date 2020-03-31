@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 // Emails API
 // Management and editing of in-game emails.
-router.use('/emails', require("./emails/email"));
+router.use('/email', require("./emails/email"));
 
 // Posting API
 // Management and editing of in-game mission board posts.
@@ -186,6 +186,7 @@ router.post('/new', (req, res) => {
         .insert({
             extensionId: currentExtension,
             activeCheck: missionInfo.activeCheck,
+            id: missionInfo.id,
             shouldIgnoreSenderVerification: missionInfo.shouldIgnoreSenderVerification,
             missionStart: missionInfo.missionStart,
             missionEnd: missionInfo.missionEnd,

@@ -1,6 +1,18 @@
 const router = require("express").Router();
 
 // GET
+// '/types/list'
+// Retrieves list of all possible goal types.
+router.get('/types/list', (req, res) => {
+    let knex = req.app.get('db');
+
+    knex("hn_MGoalType")
+        .then(rows => {
+            res.json(rows);
+        });
+});
+
+// GET
 // '/list/:id'
 // Retrieves a list of all goals currently set for the mission with specified ID.
 router.get('/list/:id', (req, res) => {
@@ -31,31 +43,47 @@ router.post('/new', (req, res) => {
 
     let goalInfo = req.body;
 
-    knex("hn_MissionGoal")
-        .insert({
-            typeId: goalInfo.typeId,
-            file: goalInfo.file,
-            path: goalInfo.path,
-            keyword: goalInfo.keyword,
-            removal: goalInfo.removal,
-            caseSensitive: goalInfo.caseSensitive,
-            owner: goalInfo.owner,
-            degree: goalInfo.degree,
-            uni: goalInfo.uni,
-            gpa: goalInfo.gpa,
-            mailServer: goalInfo.mailServer,
-            recipient: goalInfo.recipient,
-            subject: goalInfo.subject
-        })
-        .returning("goalId")
-        .then(ids => {
-            if (ids.length > 0) {
-                goalInfo.goalId = ids[0];
-                res.json(goalInfo);
-            } else {
-                res.sendStatus(500);
-            }
-        });
+    let targetMission = parseInt(req.body.missionId);
+
+    if (!isNaN(targetMission)) {
+
+        knex("hn_MissionGoal")
+            .insert({
+                typeId: goalInfo.typeId,
+                file: goalInfo.file,
+                path: goalInfo.path,
+                keyword: goalInfo.keyword,
+                removal: goalInfo.removal,
+                caseSensitive: goalInfo.caseSensitive,
+                owner: goalInfo.owner,
+                degree: goalInfo.degree,
+                uni: goalInfo.uni,
+                gpa: goalInfo.gpa,
+                mailServer: goalInfo.mailServer,
+                recipient: goalInfo.recipient,
+                subject: goalInfo.subject
+            })
+            .returning("goalId")
+            .then(ids => {
+                if (ids.length > 0) {
+                    goalInfo.goalId = ids[0];
+
+                    knex("ln_Goal_Mission")
+                        .insert({
+                            missionId: targetMission,
+                            goalId: goalInfo.goalId
+                        })
+                        .then(() => {
+                            res.json(goalInfo);
+                        });
+                } else {
+                    res.sendStatus(500);
+                }
+            });
+    } else {
+        res.status(400);
+        res.send("<h2>No Mission ID specified. Must have an Mission ID to link the goal to.</h2>")
+    }
 });
 
 // PUT
