@@ -23,7 +23,10 @@ const db = knex({
 // Initialise user_data directory
 fs.exists(`${__dirname}/user_data`, (exists) => {
     if (!exists) {
-        fs.mkdir(`${__dirname}/user_data`);
+        fs.mkdir(`${__dirname}/user_data`, () => {
+            // Log to console.
+            console.log(`Directory '/user_data' created.`);
+        });
     }
 });
 

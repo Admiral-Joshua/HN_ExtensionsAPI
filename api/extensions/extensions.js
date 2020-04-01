@@ -49,15 +49,15 @@ router.get('/:id', (req, res) => {
                         res.json(rows);
                     } else {
                         res.status(404);
-                        res.send('<h2>404 - Not Found</h2>');
+                        res.send('<h2>Extension with that ID could not be found.</h2>');
                     }
                 });
 
 
         } else {
             // 404 - Extension not specified.
-            res.status(404);
-            res.send('<h2>404 - Not Found</h2>');
+            res.status(400);
+            res.send('<h2>Extension ID not specified or is invalid.</h2>');
         }
     }
 });
