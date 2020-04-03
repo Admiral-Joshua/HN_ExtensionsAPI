@@ -68,7 +68,7 @@ router.put('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Action ID not specified or invalid.</h2>");
+        res.send("Action ID not specified or invalid.");
     }
 });
 

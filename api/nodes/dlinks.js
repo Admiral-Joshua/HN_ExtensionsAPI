@@ -19,7 +19,7 @@ router.get('/list/:id', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send("<h2>Node ID not specified or invalid.</h2>");
+        res.send("Node ID not specified or invalid.");
     }
 });
 
@@ -48,12 +48,12 @@ router.get('/link', (req, res) => {
                 } else {
                     // Something more serious occurred.
                     res.sendStatus(500);
-                    console.error(err.message);//res.send(err.message);
+                    console.error(err.message); //res.send(err.message);
                 }
             })
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(srcNodeId) ? 'Source' : 'Dest'} ID is missing or is invalid.</h2>`);
+        res.send(`${isNaN(srcNodeId) ? 'Source' : 'Dest'} ID is missing or is invalid.`);
     }
 });
 
@@ -78,7 +78,7 @@ router.get('/unlink', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(srcNodeId) ? 'Source' : 'Dest'} ID is missing or is invalid.</h2>`);
+        res.send(`${isNaN(srcNodeId) ? 'Source' : 'Dest'} ID is missing or is invalid.`);
     }
 });
 

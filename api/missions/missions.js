@@ -34,7 +34,7 @@ router.get('/linkEmail', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(missionId) ? 'Mission' : 'Email'} ID not specified.</h2>`);
+        res.send(`${isNaN(missionId) ? 'Mission' : 'Email'} ID not specified.`);
     }
 });
 
@@ -63,23 +63,32 @@ router.get('/linkPosting', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(missionId) ? 'Mission' : 'Posting'} ID not specified.</h2>`);
+        res.send(`${isNaN(missionId) ? 'Mission' : 'Posting'} ID not specified.`);
     }
 });
 
 // GET
 // '/list'
 // Retrives list of all missions defined in the current Hacknet Extension.
-router.get('/list', (req, res) => {
+router.get('/list/:id?', (req, res) => {
     let knex = req.app.get('db');
 
     let currentExtension = req.cookies.extId;
 
-    knex("hn_Mission")
+    let excludeId = req.params.id;
+
+    let query = knex("hn_Mission")
         .where({ extensionId: currentExtension })
-        .then(missions => {
-            res.json(missions);
-        });
+        .orderBy('missionId', 'asc')
+
+    if (!isNaN(excludeId)) {
+        query.whereNot({ missionId: excludeId });
+    }
+
+
+    query.then(missions => {
+        res.json(missions);
+    });
 });
 
 // GET
@@ -102,12 +111,12 @@ router.get('/:id', (req, res) => {
                     res.json(mission);
                 } else {
                     res.status(404);
-                    res.send("<h2>Could not find mission with specified ID.</h2>");
+                    res.send("Could not find mission with specified ID.");
                 }
             });
     } else {
         res.status(400);
-        res.send("<h2>Invalid or unspecified Mission ID.</h2>");
+        res.send("Invalid or unspecified Mission ID.");
     }
 });
 
@@ -199,7 +208,18 @@ router.post('/new', (req, res) => {
         .then((ids) => {
             if (ids.length > 0) {
                 missionInfo.missionId = ids[0];
-                res.json(missionInfo);
+
+                // Create Goal links
+                var links = [];
+                missionInfo.goals.forEach(goal => {
+                    links.push({ missionId: missionInfo.missionId, goalId: goal.goalId });
+                });
+
+                knex("ln_Goal_Mission")
+                    .insert(links)
+                    .then(() => {
+                        res.json(missionInfo);
+                    })
             } else {
                 res.sendStatus(500);
             }
@@ -219,23 +239,44 @@ router.put('/:id', (req, res) => {
     let missionId = parseInt(req.params.id);
 
     if (missionId && !isNaN(missionId)) {
-        knex("hn_Mission")
-            .update({
-                activeCheck: missionInfo.activeCheck,
-                shouldIgnoreSenderVerification: missionInfo.shouldIgnoreSenderVerification,
-                missionStart: missionInfo.missionStart,
-                missionEnd: missionInfo.missionEnd,
-                IsSilent: missionInfo.IsSilent,
-                emailId: missionInfo.emailId,
-                postingId: missionInfo.postingId
-            })
-            .where({ missionId: missionId, extensionId: currentExtension })
+        // Delete existing Goal Links first.
+        knex("ln_Goal_Mission")
+            .where({ missionId: missionId })
+            .del()
             .then(() => {
-                res.json(missionInfo);
-            });
+                // Update mission info.
+                knex("hn_Mission")
+                    .update({
+                        id: missionInfo.id,
+                        activeCheck: missionInfo.activeCheck,
+                        shouldIgnoreSenderVerification: missionInfo.shouldIgnoreSenderVerification,
+                        missionStart: missionInfo.missionStart,
+                        missionEnd: missionInfo.missionEnd,
+                        IsSilent: missionInfo.IsSilent,
+                        emailId: missionInfo.emailId,
+                        postingId: missionInfo.postingId,
+                        nextMission: missionInfo.nextMission
+                    })
+                    .where({ missionId: missionId, extensionId: currentExtension })
+                    .then(() => {
+
+                        // Re-add Goal Links
+                        var links = [];
+                        missionInfo.goals.forEach(goal => {
+                            links.push({ missionId: missionId, goalId: goal.goalId })
+                        });
+
+                        knex("ln_Goal_Mission")
+                            .insert(links)
+                            .then(() => {
+                                res.json(missionInfo);
+                            })
+                    });
+            })
+
     } else {
         res.status(400);
-        res.send("<h2>Invalid or unspecified Mission ID.</h2>");
+        res.send("Invalid or unspecified Mission ID.");
     }
 });
 
@@ -291,7 +332,7 @@ router.delete('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Invalid or unspecified Mission ID.</h2>");
+        res.send("Invalid or unspecified Mission ID.");
     }
 });
 

@@ -5,7 +5,15 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const jwt = require("express-jwt");
 const fs = require("fs");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
+
+var whitelist = ['http://dev.lunasphere.co.uk', 'http://dev.lunasphere.co.uk:4200']
+var corsOptions = {
+    origin: 'http://dev.lunasphere.co.uk:4200',
+    credentials: true,
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
 // Import back-end API code.
 const API = require("./api/api");
@@ -32,6 +40,10 @@ fs.exists(`${__dirname}/user_data`, (exists) => {
 
 const app = express();
 
+// Allow some CORS
+//app.options('*', cors()) // include before other routes
+app.use(cors(corsOptions));
+
 // Push SQL-Builder to app so it can be utilised throughout the project.
 app.set('db', db);
 app.set('path', `${__dirname}`);
@@ -47,17 +59,25 @@ app.use(fileUpload({
     limits: { fileSize: 5 * 1024 * 1024 } // Limit to 5MB
 }));
 
+
+
 // Authorization - Don't let non-authenticated users work on extensions.
 app.use(jwt({
-    secret: config.security.secret
-}))
+    secret: config.security.secret,
+    strict: false
+}));
+
+//.unless({ path: [/api\/music\/play\/[0-9]*/] })
 
 // App Handler in the event the user has not yet authenticated
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
         // TODO: Redirect to Lunasphere login page.
         res.status(401);
-        res.send("<h2>Not currently logged in, or credentials have expired.</h2>");
+        res.send("Not currently logged in, or credentials have expired.");
+    } else if (err.message === "Not allowed by CORS") {
+        res.status(401);
+        res.send("Source address is forbidden access by CORS.");
     }
 });
 
@@ -66,6 +86,6 @@ app.use('/api', API);
 
 // Start the server.
 let port = process.env.PORT || 80;
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`HN Extensions API -- Started @0.0.0.0:${port}`)
 });

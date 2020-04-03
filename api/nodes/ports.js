@@ -26,13 +26,13 @@ router.put('/remap', (req, res) => {
     // Validate
     if (isNaN(srcPortId)) {
         res.status(400);
-        res.send("<h2>Source Port ID not specified or invalid.</h2>");
+        res.send("Source Port ID not specified or invalid.");
     } else if (isNaN(destPort)) {
         res.status(400);
-        res.send("<h2>Destination Port not specified or invalid.</h2>");
+        res.send("Destination Port not specified or invalid.");
     } else if (isNaN(nodeId)) {
         res.status(400);
-        res.send("<h2>Computer ID not specified or invalid.</h2>");
+        res.send("Computer ID not specified or invalid.");
     } else {
 
         // Check specified port actually exists
@@ -41,7 +41,7 @@ router.put('/remap', (req, res) => {
             .then(rows => {
                 if (rows.length === 0) {
                     res.status(400);
-                    res.send("<h2>Port ID specified does not exist or is invalid.</h2>");
+                    res.send("Port ID specified does not exist or is invalid.");
                 } else {
                     // Check if this mapping already exists
                     knex("hn_PortRemap")
@@ -83,13 +83,13 @@ router.delete('/remap', (req, res) => {
     // Validate
     if (isNaN(srcPortId)) {
         res.status(400);
-        res.send("<h2>Source Port ID not specified or invalid.</h2>");
+        res.send("Source Port ID not specified or invalid.");
     } else if (isNaN(destPort)) {
         res.status(400);
-        res.send("<h2>Destination Port not specified or invalid.</h2>");
+        res.send("Destination Port not specified or invalid.");
     } else if (isNaN(nodeId)) {
         res.status(400);
-        res.send("<h2>Computer ID not specified or invalid.</h2>");
+        res.send("Computer ID not specified or invalid.");
     } else {
         knex("hn_PortRemap")
             .where({
@@ -162,7 +162,7 @@ router.get('/map', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send(`<h2>No ${!portId ? 'PortID' : 'NodeID'} specified.</h2>`);
+        res.send(`No ${!portId ? 'PortID' : 'NodeID'} specified.`);
     }
 });
 
@@ -189,7 +189,7 @@ router.get('/unmap', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send(`<h2>No ${!portId ? 'PortID' : 'NodeID'} specified.</h2>`);
+        res.send(`No ${!portId ? 'PortID' : 'NodeID'} specified.`);
     }
 });
 

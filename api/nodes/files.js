@@ -99,7 +99,7 @@ router.get('/map', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send(`<h2>Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.</h2>`);
+        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
     }
 });
 
@@ -119,7 +119,7 @@ router.get('/unmap', (req, res) => {
             .del();
     } else {
         res.status(400);
-        res.send(`<h2>Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.</h2>`);
+        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
     }
 });
 
@@ -150,7 +150,7 @@ router.delete('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>No File ID specified, or invalid.</h2>")
+        res.send("No File ID specified, or invalid.")
     }
 });
 

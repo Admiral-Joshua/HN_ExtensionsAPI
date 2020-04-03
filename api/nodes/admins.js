@@ -33,7 +33,7 @@ router.get('/types/list', (req, res) => {
 // '/admins/new'
 // Create a new admin with the specified information.
 router.post('/new', (req, res) => {
-    let knex = req.app.get('knex');
+    let knex = req.app.get('db');
     let user = req.user;
 
     let currentExtension = req.cookies.extId;
@@ -44,7 +44,7 @@ router.post('/new', (req, res) => {
 
     knex("hn_Admin")
         .insert(adminInfo)
-        .returning("adminInfoId")
+        .returning("adminId")
         .then((ids) => {
             if (ids.length > 0) {
                 adminInfo.adminId = ids[0];
@@ -54,6 +54,7 @@ router.post('/new', (req, res) => {
             }
         }).catch(err => {
             res.sendStatus(500);
+            console.log(err);
         });
 });
 

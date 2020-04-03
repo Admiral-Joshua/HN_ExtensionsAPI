@@ -90,7 +90,7 @@ router.delete('/:id', (req, res) => {
             .del();
     } else {
         res.status(400);
-        res.send("<h2>Action Set ID not specified or invalid.</h2>");
+        res.send("Action Set ID not specified or invalid.");
     }
 });
 

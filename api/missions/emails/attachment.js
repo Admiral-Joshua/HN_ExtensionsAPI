@@ -41,7 +41,7 @@ router.get('/map', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.</h2>`);
+        res.send(`${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.`);
     }
 });
 
@@ -65,7 +65,7 @@ router.get('unmap', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send(`<h2>${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.</h2>`);
+        res.send(`${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.`);
     }
 });
 

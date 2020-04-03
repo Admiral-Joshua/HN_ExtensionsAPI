@@ -17,12 +17,12 @@ router.get('/:id', (req, res) => {
                     res.json(post);
                 } else {
                     res.status(404);
-                    res.send("<h2>Post could not be found.</h2>")
+                    res.send("Post could not be found.")
                 }
             })
     } else {
         res.status(400);
-        res.send("<h2>Posting ID not specified, or was invalid.</h2>");
+        res.send("Posting ID not specified, or was invalid.");
     }
 });
 
@@ -53,7 +53,7 @@ router.post('/new', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send("<h2>Posting ID not specified, or was invalid.</h2>");
+        res.send("Posting ID not specified, or was invalid.");
     }
 });
 
@@ -80,7 +80,7 @@ router.put('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Posting ID not specified, or was invalid.</h2>");
+        res.send("Posting ID not specified, or was invalid.");
     }
 });
 
@@ -101,7 +101,7 @@ router.delete('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Posting ID not specified, or was invalid.</h2>");
+        res.send("Posting ID not specified, or was invalid.");
     }
 });
 

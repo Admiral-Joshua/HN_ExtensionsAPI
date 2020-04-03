@@ -17,12 +17,25 @@ router.get('/list', (req, res) => {
 
     if (currentExtension) {
         knex("hn_CompNode")
-            .select('nodeId', 'id', 'name', 'ip', 'typeText')
+            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', 'portsForCrack', 'traceTime', 'icon', 'portType')
             .where({ extensionId: currentExtension })
-            .join('hn_CompType', { 'hn_CompNode.typeId': 'hn_CompType.typeId' })
+            .leftJoin('ln_Comp_Ports', { 'hn_CompNode.nodeId': 'ln_Comp_Ports.nodeId' })
+            .leftJoin('hn_Ports', { 'hn_Ports.portId': 'ln_Comp_Ports.portId' })
             .then(rows => {
-                res.json(rows);
-            });
+                let comps = new Map();
+
+                rows.forEach(node => {
+                    if (comps.has(node.nodeId)) {
+                        comps.get(node.nodeId).ports.push(node.portType);
+                    } else {
+                        let comp = node;
+                        comp.ports = [node.portType];
+
+                        comps.set(node.nodeId, comp);
+                    }
+                });
+                res.json([...comps.values()]);
+            })
 
         return;
     }
@@ -43,16 +56,35 @@ router.get('/:id', (req, res) => {
     if (nodeId && !isNaN(nodeId)) {
         knex("hn_CompNode")
             .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker')
-            .where({ 'nodeId': nodeId })
+
+        .where({ 'nodeId': nodeId })
             .first()
             .then(nodeInfo => {
 
                 if (nodeInfo) {
-                    res.json(nodeInfo);
+                    // Retrieve Port information for this PC.
+                    knex("ln_Comp_Ports")
+                        .select('hn_Ports.*')
+                        .where({ nodeId: nodeInfo.nodeId })
+                        .join('hn_Ports', { 'hn_Ports.portId': 'ln_Comp_Ports.portId' })
+                        .then(ports => {
+                            nodeInfo.ports = ports;
+
+                            // Retrive File information for this PC.
+                            knex("ln_Comp_File")
+                                .where({ nodeId: nodeInfo.nodeId })
+                                .join('hn_CompFile', { 'ln_Comp_File.fileId': 'hn_CompFile.fileId' })
+                                .then(files => {
+                                    nodeInfo.files = files;
+
+                                    res.json(nodeInfo);
+                                });
+                        });
                 } else {
                     res.status(404);
-                    res.send("<h2>Computer Node does not exist.</h2>")
+                    res.send("Computer Node does not exist.")
                 }
+
             });
     } else {
         res.sendStatus(400);
@@ -78,7 +110,7 @@ router.post('/new', (req, res) => {
         .then(rows => {
             if (rows.length !== 0) {
                 res.status(400);
-                res.send("<h2>The ID of the computer must be unique within this extension.</h2>");
+                res.send("The ID of the computer must be unique within this extension.");
             } else {
                 knex("hn_CompNode")
                     .insert({
@@ -130,6 +162,45 @@ router.post('/new', (req, res) => {
                     });
             }
         });
+});
+
+// PUT
+// '/:id'
+// Updates existing Computer Node with the specified information
+router.put('/:id', (req, res) => {
+    let knex = req.app.get('db');
+    let user = req.user;
+
+    let currentExtension = req.cookies.extId;
+
+    let nodeId = parseInt(req.params.id);
+    let nodeInfo = req.body;
+
+    if (!isNaN(nodeId)) {
+        // UPDATE the other information
+        knex("hn_CompNode")
+            .update({
+                id: nodeInfo.id,
+                name: nodeInfo.name,
+                ip: nodeInfo.ip,
+                securityLevel: nodeInfo.securityLevel,
+                allowsDefaultBootModule: nodeInfo.allowsDefaultBootModule,
+                icon: nodeInfo.icon,
+                typeId: nodeInfo.typeId,
+                adminPass: nodeInfo.adminPass,
+                portsForCrack: nodeInfo.portsForCrack,
+                traceTime: nodeInfo.traceTime,
+                adminInfoId: nodeInfo.adminInfoId,
+                tracker: nodeInfo.tracker
+            })
+            .where({ nodeId: nodeId })
+            .then(() => {
+                res.json(nodeInfo);
+            });
+    } else {
+        res.status(400);
+        res.send("Node ID was not specified or was invalid.")
+    }
 });
 
 module.exports = router;

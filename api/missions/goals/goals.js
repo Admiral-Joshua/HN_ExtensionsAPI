@@ -31,9 +31,30 @@ router.get('/list/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Mission ID not specified or invalid.</h2>");
+        res.send("Mission ID not specified or invalid.");
     }
 });
+
+// GET
+// '/:id'
+// Retrieve detailed Goal info
+router.get('/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let goalId = parseInt(req.params.id);
+
+    if (!isNaN(goalId)) {
+        knex("hn_MissionGoal")
+            .where({ goalId: goalId })
+            .first()
+            .then(goalInfo => {
+                res.json(goalInfo);
+            })
+    } else {
+        res.status(400);
+        res.send("No Goal ID specified or invalid.");
+    }
+})
 
 // POST
 // '/new'
@@ -43,47 +64,46 @@ router.post('/new', (req, res) => {
 
     let goalInfo = req.body;
 
-    let targetMission = parseInt(req.body.missionId);
+    knex("hn_MissionGoal")
+        .insert({
+            typeId: goalInfo.typeId,
+            file: goalInfo.file,
+            path: goalInfo.path,
+            keyword: goalInfo.keyword,
+            removal: goalInfo.removal,
+            caseSensitive: goalInfo.caseSensitive,
+            owner: goalInfo.owner,
+            degree: goalInfo.degree,
+            uni: goalInfo.uni,
+            gpa: goalInfo.gpa,
+            mailServer: goalInfo.mailServer,
+            recipient: goalInfo.recipient,
+            subject: goalInfo.subject,
+            target: goalInfo.target,
+            delay: goalInfo.delay,
+            targetNodeId: goalInfo.targetNodeId
+        })
+        .returning("goalId")
+        .then(ids => {
+            if (ids.length > 0) {
+                goalInfo.goalId = ids[0];
+
+                res.json(goalInfo);
+
+            } else {
+                res.sendStatus(500);
+            }
+        });
+
+    /*let targetMission = parseInt(req.body.missionId);
 
     if (!isNaN(targetMission)) {
 
-        knex("hn_MissionGoal")
-            .insert({
-                typeId: goalInfo.typeId,
-                file: goalInfo.file,
-                path: goalInfo.path,
-                keyword: goalInfo.keyword,
-                removal: goalInfo.removal,
-                caseSensitive: goalInfo.caseSensitive,
-                owner: goalInfo.owner,
-                degree: goalInfo.degree,
-                uni: goalInfo.uni,
-                gpa: goalInfo.gpa,
-                mailServer: goalInfo.mailServer,
-                recipient: goalInfo.recipient,
-                subject: goalInfo.subject
-            })
-            .returning("goalId")
-            .then(ids => {
-                if (ids.length > 0) {
-                    goalInfo.goalId = ids[0];
-
-                    knex("ln_Goal_Mission")
-                        .insert({
-                            missionId: targetMission,
-                            goalId: goalInfo.goalId
-                        })
-                        .then(() => {
-                            res.json(goalInfo);
-                        });
-                } else {
-                    res.sendStatus(500);
-                }
-            });
+        
     } else {
         res.status(400);
-        res.send("<h2>No Mission ID specified. Must have an Mission ID to link the goal to.</h2>")
-    }
+        res.send("No Mission ID specified. Must have an Mission ID to link the goal to.")
+    }*/
 });
 
 // PUT
@@ -110,7 +130,10 @@ router.put('/:id', (req, res) => {
                 gpa: goalInfo.gpa,
                 mailServer: goalInfo.mailServer,
                 recipient: goalInfo.recipient,
-                subject: goalInfo.subject
+                subject: goalInfo.subject,
+                target: goalInfo.target,
+                delay: goalInfo.delay,
+                targetNodeId: goalInfo.targetNodeId
             })
             .where({
                 goalId: goalId
@@ -120,7 +143,7 @@ router.put('/:id', (req, res) => {
             })
     } else {
         res.status(400);
-        res.send("<h2>Goal ID not specified or invalid.</h2>")
+        res.send("Goal ID not specified or invalid.")
     }
 })
 
@@ -147,7 +170,7 @@ router.delete('/:id', (req, res) => {
             });
     } else {
         res.status(400);
-        res.send("<h2>Goal ID not specified or invalid.</h2>");
+        res.send("Goal ID not specified or invalid.");
     }
 });
 
