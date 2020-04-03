@@ -21,7 +21,10 @@ INSERT INTO "hn_Music" ("musicId", "ownerId", "title") VALUES
 (17, 0, 'Slow_Motion'),
 (18, 0, 'snidelyWhiplash'),
 (19, 0, 'Uberspacelike'),
-(20, 0, 'World_Chase')
+(20, 0, 'World_Chase'),
+(21, 0, 'Roller_Mobster'),
+(22, 0, 'Traced'),
+(23, 0, 'CrashTrack')
 ON CONFLICT ("musicId") DO NOTHING;
 -- TODO: ADD DLC_Music tracks
 
@@ -118,3 +121,9 @@ INSERT INTO "hn_ActionType" ("typeId", "typeText") VALUES
 (21, 'Change IP'),
 (22, 'Change NetMap Sort'),
 (23, 'Save Game') ON CONFLICT ("typeId") DO NOTHING;
+
+-- hn_Mission
+-- A NONE mission
+INSERT INTO "hn_Mission" ("missionId", "id") VALUES
+(0, 'NONE')
+ON CONFLICT("missionId") DO NOTHING;
