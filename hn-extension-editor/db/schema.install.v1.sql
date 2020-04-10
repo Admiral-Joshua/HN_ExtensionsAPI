@@ -21,13 +21,6 @@ CREATE TABLE IF NOT EXISTS "hn_Music" (
   "title" text
 );
 
-CREATE TABLE IF NOT EXISTS "hn_Theme" (
-  "themeId" SERIAL PRIMARY KEY,
-  "extensionId" int,
-  "ownerId" int,
-  "meta" varchar
-);
-
 CREATE TABLE IF NOT EXISTS "hn_Mission" (
   "missionId" SERIAL PRIMARY KEY,
   "extensionId" int,
@@ -263,6 +256,44 @@ CREATE TABLE IF NOT EXISTS "hn_ircUser" (
 CREATE TABLE IF NOT EXISTS "ln_Comp_Dlink" (
 	"srcNodeId" int,
 	"destNodeId" int
+);
+
+-- Themes Tables
+CREATE TABLE IF NOT EXISTS "hn_Theme" (
+  "themeId" SERIAL PRIMARY KEY,
+  "extensionId" int,
+
+  "LayoutName" text,
+  "BackgroundImagePath" text,
+  "defaultHighlightColor" text,
+  "defaultTopBarColor" text,
+  "moduleColorSolidDefault" text,
+  "moduleColorStrong" text,
+  "moduleColorBacking" text,
+  "exeModuleTopBar" text,
+  "exeModuleTitleText" text,
+  "warningColor" text,
+  "subtleTextColor" text,
+  "darkBackgroundColor" text,
+  "indentBackgroundColor" text,
+  "outlineColor" text,
+  "lockedColor" text,
+  "brightLockedColor" text,
+  "brightUnlockedColor" text,
+  "unlockedColor" text,
+  "lightGray" text,
+  "shellColor" text,
+  "shellButtonColor" text,
+  "semiTransText" text,
+  "terminalTextColor" text,
+  "topBarTextColor" text,
+  "superLightWhite" text,
+  "connectedNodeHighlight" text,
+  "netmapToolTipColor" text,
+  "netmapToolTipBackground" text,
+  "topBarIconsColor" text,
+  "thisComputerNode" text,
+  "scanlinesColor" text
 );
 
 ALTER TABLE "user_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");

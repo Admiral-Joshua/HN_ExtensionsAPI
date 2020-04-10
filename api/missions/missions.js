@@ -18,8 +18,8 @@ router.use('/goals', require("./goals/goals"));
 router.get('/linkEmail', (req, res) => {
     let knex = req.app.get('db');
 
-    let missionId = parseInt(req.params.mission);
-    let emailId = parseInt(req.params.email);
+    let missionId = parseInt(req.query.mission);
+    let emailId = parseInt(req.query.email);
 
     if (!isNaN(missionId) && !isNaN(emailId)) {
         knex("hn_Mission")

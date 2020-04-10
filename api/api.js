@@ -27,6 +27,10 @@ router.use('/extensions', extensionsAPI);
     }
 });*/
 
+// Themes API
+// For creation and modification of custom themes
+router.use('/themes', require("./themes/themes"));
+
 // Music API
 // For uploading, selecting and playing music tracks for an extension.
 router.use('/music', require("./music/music"));
