@@ -2,3 +2,4 @@ node_modules
 user_data/
 config.json
 go-builder-test/temp/
+extension-builder/target
