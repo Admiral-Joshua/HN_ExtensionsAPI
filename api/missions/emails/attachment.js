@@ -11,6 +11,7 @@ router.get('/list/:id', (req, res) => {
     if (!isNaN(emailId)) {
         knex("ln_attachment_email")
             .join('hn_EmailAttachment', { 'ln_attachment_email.attachmentId': 'hn_EmailAttachment.attachmentId' })
+            .join('hn_AttachmentType', { 'hn_AttachmentType.typeId': 'hn_EmailAttachment.typeId' })
             .where({ emailId: emailId })
             .then(rows => {
                 res.json(rows);
@@ -48,7 +49,7 @@ router.get('/map', (req, res) => {
 // GET
 // '/unmap?email=<id>&attachment=<id>
 // Unmaps attachment from an email
-router.get('unmap', (req, res) => {
+router.get('/unmap', (req, res) => {
     let knex = req.app.get('db');
 
     let emailId = parseInt(req.query.email);
@@ -56,6 +57,9 @@ router.get('unmap', (req, res) => {
 
     if (!isNaN(emailId) && !isNaN(attachmentId)) {
         knex("ln_attachment_email")
+            .update({
+                attachmentId: null
+            })
             .where({
                 emailId: emailId,
                 attachmentId: attachmentId
@@ -94,6 +98,7 @@ router.get('/:id', (req, res) => {
     if (attachmentId && !isNaN(attachmentId)) {
         knex("hn_EmailAttachment")
             .where({ extensionId: currentExtension, attachmentId: attachmentId })
+            .join('hn_AttachmentType', { 'hn_AttachmentType.typeId': 'hn_EmailAttachment.typeId' })
             .first()
             .then(attachment => {
                 res.json(attachment);
@@ -165,12 +170,11 @@ router.delete('/:id', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
 
-    let currentExtension = req.cookies.extId;
     let attachmentId = parseInt(req.params.id);
 
     if (attachmentId && !isNaN(attachmentId)) {
         knex("hn_EmailAttachment")
-            .where({ extensionId: currentExtension, attachmentId: attachmentId })
+            .where({ attachmentId: attachmentId })
             .del()
             .then(() => {
                 res.sendStatus(204);

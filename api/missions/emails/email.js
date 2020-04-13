@@ -76,7 +76,7 @@ router.put('/:id', (req, res) => {
                 subject: emailInfo.subject,
                 body: emailInfo.body
             })
-            .where({ missionId: missionId, extensionId: currentExtension })
+            .where({ emailId: emailId })
             .then(() => {
                 res.json(emailInfo);
             });
@@ -91,7 +91,7 @@ router.delete('/:id', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
 
-    let currentExtension = req.cookies.extensionId;
+    let currentExtension = req.cookies.extId;
 
     let emailId = parseInt(req.params.id);
 
@@ -99,12 +99,12 @@ router.delete('/:id', (req, res) => {
 
         knex("hn_Mission")
             .update({
-                emailId: null
+                emailId: 0
             })
             .where({ emailId: emailId, extensionId: currentExtension })
             .then(() => {
                 knex("hn_Email")
-                    .where({ emailId: emailId, extensionId: currentExtension })
+                    .where({ emailId: emailId })
                     .del()
                     .then(() => {
                         res.sendStatus(204);

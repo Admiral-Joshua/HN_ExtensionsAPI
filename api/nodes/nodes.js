@@ -33,6 +33,7 @@ router.get('/list', (req, res) => {
 
                         comps.set(node.nodeId, comp);
                     }
+
                 });
                 res.json([...comps.values()]);
             })
@@ -55,7 +56,7 @@ router.get('/:id', (req, res) => {
 
     if (nodeId && !isNaN(nodeId)) {
         knex("hn_CompNode")
-            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker')
+            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', 'typeId', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker')
 
         .where({ 'nodeId': nodeId })
             .first()
