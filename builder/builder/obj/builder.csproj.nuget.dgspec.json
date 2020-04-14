@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programming\\HN_ExtensionsAPI\\builder\\builder\\builder.csproj": {}
+    "D:\\Programming\\HN_ExtensionsAPI\\Builder\\builder\\builder.csproj": {}
   },
   "projects": {
-    "D:\\Programming\\HN_ExtensionsAPI\\builder\\builder\\builder.csproj": {
+    "D:\\Programming\\HN_ExtensionsAPI\\Builder\\builder\\builder.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\HN_ExtensionsAPI\\builder\\builder\\builder.csproj",
+        "projectUniqueName": "D:\\Programming\\HN_ExtensionsAPI\\Builder\\builder\\builder.csproj",
         "projectName": "builder",
-        "projectPath": "D:\\Programming\\HN_ExtensionsAPI\\builder\\builder\\builder.csproj",
+        "projectPath": "D:\\Programming\\HN_ExtensionsAPI\\Builder\\builder\\builder.csproj",
         "packagesPath": "C:\\Users\\Beefy Boi\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\HN_ExtensionsAPI\\builder\\builder\\obj\\",
+        "outputPath": "D:\\Programming\\HN_ExtensionsAPI\\Builder\\builder\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\"
