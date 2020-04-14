@@ -127,3 +127,9 @@ INSERT INTO "hn_ActionType" ("typeId", "typeText") VALUES
 INSERT INTO "hn_Mission" ("missionId", "id") VALUES
 (0, 'NONE')
 ON CONFLICT("missionId") DO NOTHING;
+
+-- hn_Email
+-- A NONE Email
+INSERT INTO "hn_Email" ("emailId", "sender", "subject", "body") VALUES
+(0, 'NONE', 'NONE', 'NONE')
+ON CONFLICT("emailId") DO NOTHING;

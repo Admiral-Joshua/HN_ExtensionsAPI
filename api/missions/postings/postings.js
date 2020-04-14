@@ -32,29 +32,24 @@ router.get('/:id', (req, res) => {
 router.post('/new', (req, res) => {
     let knex = req.app.get('db');
 
-    let postingId = parseInt(req.params.id);
     let postInfo = req.body;
 
-    if (!isNaN(postingId)) {
-        knex("hn_BoardPost")
-            .insert({
-                title: postInfo.title,
-                reqs: postInfo.reqs,
-                requiredRank: postInfo.requiredRank,
-                content: postInfo.content
-            })
-            .returning("postingId")
-            .then((ids) => {
-                if (ids.length > 0) {
-                    postInfo.postingId = ids[0];
-                } else {
-                    res.sendStatus(500);
-                }
-            })
-    } else {
-        res.status(400);
-        res.send("Posting ID not specified, or was invalid.");
-    }
+    knex("hn_BoardPost")
+        .insert({
+            title: postInfo.title,
+            reqs: postInfo.reqs,
+            requiredRank: postInfo.requiredRank,
+            content: postInfo.content
+        })
+        .returning("postingId")
+        .then((ids) => {
+            if (ids.length > 0) {
+                postInfo.postingId = ids[0];
+                res.json(postInfo);
+            } else {
+                res.sendStatus(500);
+            }
+        });
 });
 
 // PUT
@@ -90,15 +85,26 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
     let knex = req.app.get('db');
 
+    let currentExtension = parseInt(req.cookies.extId);
     let postingId = parseInt(req.params.id);
 
     if (!isNaN(postingId)) {
-        knex("hn_BoardPost")
-            .where({ postingId: postingId })
-            .del()
+        // Remove any links missions might have to this posting first!
+        knex("hn_Mission")
+            .update({
+                postingId: null
+            })
+            .where({ postingId: postingId, extensionId: currentExtension })
             .then(() => {
-                res.sendStatus(204);
-            });
+                // SUCCESS
+                // Continue to perform delete
+                knex("hn_BoardPost")
+                    .where({ postingId: postingId })
+                    .del()
+                    .then(() => {
+                        res.sendStatus(204);
+                    });
+            })
     } else {
         res.status(400);
         res.send("Posting ID not specified, or was invalid.");

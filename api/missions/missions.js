@@ -44,8 +44,8 @@ router.get('/linkEmail', (req, res) => {
 router.get('/linkPosting', (req, res) => {
     let knex = req.app.get('db');
 
-    let missionId = parseInt(req.params.mission);
-    let postingId = parseInt(req.params.posting);
+    let missionId = parseInt(req.query.mission);
+    let postingId = parseInt(req.query.posting);
 
     if (!isNaN(missionId) && !isNaN(postingId)) {
         knex("hn_Mission")
@@ -120,20 +120,52 @@ router.get('/:id', (req, res) => {
     }
 });
 
+// GET
+// '/branch/list/:id'
+// Lists mission branches for the given mission ID.
+router.get('/branch/list/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let missionId = parseInt(req.params.id);
+
+    if (missionId) {
+        knex("hn_MissionBranch")
+            .leftJoin('hn_Mission', { 'hn_Mission.missionId': 'hn_MissionBranch.missionId_2' })
+            .where({
+                missionId_1: missionId
+            })
+            .then(results => {
+                let branches = results.map(result => {
+                    return {
+                        branchId: result.branchId,
+                        missionOne: result.missionId_1,
+                        missionTwo: result.missionId_2,
+                        missionName: result.id
+                    }
+                });
+
+                res.json(branches);
+            });
+    } else {
+        res.status(400);
+        res.send("Mission ID was not specified or is invalid.");
+    }
+})
+
 // POST
 // '/branch'
 // Creates a branch mission link between two missions.
 router.post('/branch', (req, res) => {
     let knex = req.app.get('db');
 
-    let currentExtension = req.cookies.extId;
+    //let currentExtension = req.cookies.extId;
 
     let branchInfo = req.body;
 
     knex("hn_MissionBranch")
         .insert({
-            missionId_1: missionOne,
-            missionId_2: missionTwo
+            missionId_1: branchInfo.missionOne,
+            missionId_2: branchInfo.missionTwo
         })
         .returning("branchId")
         .then(ids => {
@@ -144,6 +176,27 @@ router.post('/branch', (req, res) => {
                 res.sendStatus(500);
             }
         })
+});
+
+// DELETE 
+// '/branch/:id'
+// Deletes mission branch with specified ID.
+router.delete('/branch/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let branchId = parseInt(req.params.id);
+
+    if (!isNaN(branchId)) {
+        knex("hn_MissionBranch")
+            .where({ branchId: branchId })
+            .del()
+            .then(() => {
+                res.sendStatus(204);
+            })
+    } else {
+        res.status(400);
+        res.send("No Branch ID specified or is invalid.");
+    }
 });
 
 // GET

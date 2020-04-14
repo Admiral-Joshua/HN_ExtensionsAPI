@@ -22,6 +22,86 @@ router.get('/list/:id', (req, res) => {
     }
 });
 
+
+// GET
+// 'map?node=id&file=id
+// Maps a file with the given ID, to a node with given id.
+router.get('/map', (req, res) => {
+    let knex = req.app.get('db');
+
+    let nodeId = parseInt(req.query.node);
+    let fileId = parseInt(req.query.file);
+
+    if (!isNaN(nodeId) && !isNaN(fileId)) {
+        knex("ln_Comp_File")
+            .where({ nodeId: nodeId, fileId: fileId })
+            .first()
+            .then(row => {
+                if (row) {
+                    res.sendStatus(204);
+                } else {
+                    knex("ln_Comp_File")
+                        .insert({
+                            nodeId: nodeId,
+                            fileId: fileId
+                        })
+                        .then(() => {
+                            res.sendStatus(204);
+                        });
+                }
+            })
+    } else {
+        res.status(400);
+        res.send(`Missing ${!isNaN(nodeId) ? 'NodeID' : 'FileID'} for link to be created.`);
+    }
+});
+
+// GET
+// 'unmap?node=id&file=id
+// Removes mapping between file with specified ID, and node with specified ID.
+router.get('/unmap', (req, res) => {
+    let knex = req.app.get('db');
+    let user = req.user;
+
+    let nodeId = parseInt(req.query.node);
+    let fileId = parseInt(req.query.file);
+
+    if (nodeId && !isNaN(nodeId) && fileId && !isNaN(fileId)) {
+        knex("ln_Comp_File")
+            .where({ nodeId: nodeId, fileId: fileId })
+            .del();
+    } else {
+        res.status(400);
+        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
+    }
+});
+
+// GET
+// '/:id'
+// Retrieves information about the specified file
+router.get('/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let fileId = parseInt(req.params.id);
+
+    if (!isNaN(fileId)) {
+        knex("hn_CompFile")
+            .where({ fileId: fileId })
+            .first()
+            .then(file => {
+                if (file) {
+                    res.json(file);
+                } else {
+                    res.status(404);
+                    res.send("File with ID not found.");
+                }
+            })
+    } else {
+        res.status(400);
+        res.send("File ID not specified or is invalid.");
+    }
+})
+
 // POST
 // '/new'
 // Creates a new file under the current hacknet extension with specified information.
@@ -41,7 +121,6 @@ router.post('/new', (req, res) => {
         })
         .returning("fileId")
         .then((ids) => {
-            console.log(ids);
             if (ids.length > 0) {
                 fileInfo.fileId = ids[0];
                 res.json(fileInfo);
@@ -76,50 +155,6 @@ router.put('/:id', (req, res) => {
             .then(() => {
                 res.json(fileInfo);
             });
-    }
-});
-
-// GET
-// 'map?node=id&file=id
-// Maps a file with the given ID, to a node with given id.
-router.get('/map', (req, res) => {
-    let knex = req.app.get('db');
-
-    let nodeId = parseInt(req.query.node);
-    let fileId = parseInt(req.query.file);
-
-    if (nodeId && !isNaN(nodeId) && fileId && !isNaN(fileId)) {
-        knex("ln_Comp_File")
-            .insert({ nodeId: nodeId, fileId: fileId })
-            .then(() => {
-                res.sendStatus(204);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    } else {
-        res.status(400);
-        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
-    }
-});
-
-// GET
-// 'unmap?node=id&file=id
-// Removes mapping between file with specified ID, and node with specified ID.
-router.get('/unmap', (req, res) => {
-    let knex = req.app.get('db');
-    let user = req.user;
-
-    let nodeId = parseInt(req.query.node);
-    let fileId = parseInt(req.query.file);
-
-    if (nodeId && !isNaN(nodeId) && fileId && !isNaN(fileId)) {
-        knex("ln_Comp_File")
-            .where({ nodeId: nodeId, fileId: fileId })
-            .del();
-    } else {
-        res.status(400);
-        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
     }
 });
 

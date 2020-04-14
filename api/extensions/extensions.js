@@ -1,3 +1,5 @@
+const validator = require("../auth_validate/validate");
+
 const router = require("express").Router();
 
 // GET
@@ -47,7 +49,20 @@ router.get('/:id', (req, res) => {
                 .first()
                 .then(info => {
                     if (info) {
-                        res.json(info);
+
+                        // Now fetch a list of all NodeIds that are currently selected to be visible at startup
+                        knex("ln_Starting_Comp")
+                            .where({ extensionId: extId })
+                            .then(rows => {
+                                let startingNodes = [];
+
+                                rows.forEach(row => {
+                                    startingNodes.push(row.nodeId);
+                                });
+
+                                info.startingNodes = startingNodes;
+                                res.json(info);
+                            });
                     } else {
                         res.status(404);
                         res.send('Extension with that ID could not be found.');
@@ -79,15 +94,26 @@ router.post('/new', (req, res) => {
         .then(ids => {
             extInfo.extensionId = ids[0];
 
-            // Add link to this user.
-            knex("user_Extension")
-                .insert({
-                    extensionId: extInfo.extensionId,
-                    userId: req.user.userId
-                })
-                .then(() => {
-                    res.json(extInfo);
+            // Check for a list of NodeIds that should be visible at startup.
+            if (extInfo.startingNodes && extInfo.startingNodes.length > 0) {
+                // Proceed to add those maps for the future too
+                let nodesToAdd = extInfo.map(item => {
+                    return { nodeId: item, extensionId: extInfo.extensionId };
                 });
+                knex("ln_Starting_Comp")
+                    .insert(nodesToAdd)
+                    .then(() => {
+                        // Add link to this user.
+                        knex("user_Extension")
+                            .insert({
+                                extensionId: extInfo.extensionId,
+                                userId: req.user.userId
+                            })
+                            .then(() => {
+                                res.json(extInfo);
+                            });
+                    })
+            }
         });
 });
 
@@ -105,6 +131,7 @@ router.put('/:id', (req, res) => {
     let extensionId = parseInt(req.params.id);
 
     if (!isNaN(extensionId)) {
+        // Start by updating the bulk of the information
         knex("extension_Info")
             .where({ extensionId: extensionId })
             .update({
@@ -123,7 +150,24 @@ router.put('/:id', (req, res) => {
                 "workshop_id": extInfo.workshop_id
             })
             .then(() => {
-                res.json(extInfo);
+                // Delete existing Extension --> Node links
+                knex("ln_Starting_Comp")
+                    .where({ extensionId: extensionId })
+                    .del()
+                    .then(() => {
+                        // Convert list of nodes that should be visible at startup into Extension --> Node links
+                        let nodeLinks = extInfo.startingNodes.map(node => {
+                            return { extensionId: extensionId, nodeId: node };
+                        });
+
+                        // Insert links into database.
+                        knex("ln_Starting_Comp")
+                            .insert(nodeLinks)
+                            .then(() => {
+                                // Inform user operation is complete and return modified information.
+                                res.json(extInfo);
+                            })
+                    })
             })
     }
 })
@@ -141,10 +185,10 @@ router.delete('/:id', (req, res) => {
             .where('extensionId', extId)
             .select('userId')
             .then(row => {
-
-                // TODO: MY AUTHENTICATED USER ID
+                // Is the extension we're trying to delete definitely owned by me??
                 if (row[0].userId === req.user.userId) {
 
+                    // Yes, proceed with delete.
                     knex("user_Extension")
                         .del()
                         .where('extensionId', extId)
@@ -158,6 +202,7 @@ router.delete('/:id', (req, res) => {
                                 });
                         });
                 } else {
+                    // No, inform the client they cannot do that!
                     res.status(401);
                     res.send("This is not your Extension, and thus you cannot delete it.");
                 }
