@@ -1,6 +1,7 @@
 ﻿using System;
 using Npgsql;
 using System.Xml;
+using System.Data;
 
 namespace builder
 {
@@ -27,11 +28,29 @@ namespace builder
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Testing connection");
+            NpgsqlDataAdapter NpAdapter = null;
+            NpgsqlDataReader dr = null;
+            NpgsqlConnection conn = Connection();
 
-            Connection().Open();
+            conn.Open();
 
-            Connection().Close();
+            try
+            {
+                DataSet dataset = new DataSet("HN_EXTENSIONS");
+                NpAdapter = new NpgsqlDataAdapter();
+                string query = "SELECT * FROM \"extension_Info\"";
+                var command = NpAdapter.SelectCommand = new NpgsqlCommand(query, conn);
+
+                NpAdapter.Fill(dataset, "extension_Info");
+                dataset.WriteXml("testfile.XML");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("An error occured: " + e.Message);
+            }
+
+            conn.Close();
         }
     }
 }
