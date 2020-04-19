@@ -3,6 +3,27 @@ const router = require("express").Router();
 router.use('/action', require("./action/action"));
 
 // GET
+// '/list'
+// Retrieves a summary of action sets for the current extension
+router.get('/summary', (req, res) => {
+    let knex = req.app.get('db');
+
+    let currentExtension = parseInt(req.cookies.extId);
+
+    knex("hn_ActionSet")
+        .select('hn_ActionSet.actionSetId', 'hn_ActionSet.name', knex.raw('COUNT("hn_Action.actionId") as count'))
+        .join("LN_action_set", { "LN_action_set.actionSetId": "hn_ActionSet.actionSetId" })
+        .join("hn_Action", { "hn_Action.actionId": "LN_action_set.actionId" })
+        .where({
+            'hn_ActionSet.extensionId': currentExtension
+        })
+        .then(rows => {
+            res.json(rows);
+        })
+
+});
+
+// GET
 // '/:id'
 // Retrieve an action set and it's associated actions
 router.get('/:id', (req, res) => {

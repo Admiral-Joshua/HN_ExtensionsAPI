@@ -43,5 +43,7 @@ router.use('/nodes', secValidator(), require("./nodes/nodes"));
 // Management and editing of Mission files for an extension.
 router.use('/missions', secValidator(), require("./missions/missions"));
 
-
+// ActionSet API
+// Management and editing of ActionSets for an extension.
+router.use('/actionset', secValidator(), require("./actionset/actionset"));
 module.exports = router;

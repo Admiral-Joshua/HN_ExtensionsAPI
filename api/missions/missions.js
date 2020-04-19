@@ -92,6 +92,18 @@ router.get('/list/:id?', (req, res) => {
 });
 
 // GET
+// '/functions/list'
+// Retrieve list of possible mission functions Hacknet supports
+router.get('/functions/list', (req, res) => {
+    let knex = req.app.get('db');
+
+    knex("hn_Function")
+        .then(rows => {
+            res.json(rows);
+        })
+})
+
+// GET
 // '/:id'
 // Retrieves Mission information for mission with the given mission ID.
 router.get('/:id', (req, res) => {

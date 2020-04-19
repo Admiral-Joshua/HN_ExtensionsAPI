@@ -133,3 +133,20 @@ ON CONFLICT("missionId") DO NOTHING;
 INSERT INTO "hn_Email" ("emailId", "sender", "subject", "body") VALUES
 (0, 'NONE', 'NONE', 'NONE')
 ON CONFLICT("emailId") DO NOTHING;
+
+-- hn_Function
+-- Mission functions that Hacknet currently supports
+INSERT INTO "hn_Function" ("funcDisplayName", "funcName") VALUES
+('Set Player Faction', 'setFaction'),
+('Add Rank', 'addRank'),
+('Add Rank Silently', 'addRankSilent'),
+('Add Rank to Faction', 'addRankFaction'),
+('Add Flags', 'addFlags'),
+('Remove Flags', 'removeFlags'),
+('Change Song', 'changeSong'),
+('Load Action Set', 'loadConditionalActions'),
+('Set Hub Server', 'setHubServer'),
+('Set Asset Server', 'setAssetServer'),
+('Play Custom Song', 'playCustomSong'),
+('Play Custom Song Immediately', 'playCustomSongImmediatley')
+ON CONFLICT("functionId") DO NOTHING;

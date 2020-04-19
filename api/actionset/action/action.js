@@ -1,5 +1,38 @@
 const router = require("express").Router();
 
+// GET
+// '/types/list'
+// Retrieves list of available action types
+router.get('/types/list', (req, res) => {
+    let knex = req.app.get('db');
+
+    knex("hn_ActionType")
+        .then(types => {
+            res.json(types);
+        })
+})
+
+// GET
+// '/list'
+// Retrieves list of Actions for the given action set
+router.get('/list/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let actionSetId = parseInt(req.cookies.id);
+
+    if (!isNaN(actionSetId)) {
+        knex("LN_action_set")
+            .where({ actionSetId: actionSetId })
+            .join('hn_Action', { 'hn_Action.actionId': 'ln_action_set.actionId' })
+            .then(actions => {
+                res.json(actions);
+            });
+    } else {
+        res.status(400);
+        res.send("Action Set ID not specified or invalid.");
+    }
+});
+
 // POST
 // '/new'
 // Create new action with uploaded information.
