@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
-  title: auth.v1
+  title: luna.v1
   version: '1.0'
   contact:
     name: Joshua Richardson-Noyes
     url: lunasphere.co.uk/contact
-    email: admiral-joshua@lunasphere.co.uk
+    email: joshua.richardson-noyes@lunasphere.co.uk
   license:
     name: UNLICENSED
   description: Authentication API used by the entire Lunasphere suite to create/login/delete accounts.
@@ -17,11 +17,17 @@ servers:
 paths:
   /auth/login:
     post:
-      summary: ''
+      summary: Login to existing Account
       operationId: post-auth-login
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOPResponse'
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -37,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserAccount'
+              $ref: '#/components/schemas/Luna_Login'
       tags:
         - Authentication
   /auth/register:
@@ -56,14 +62,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserAccount'
+              $ref: '#/components/schemas/Luna_Login'
         description: ''
       tags:
         - Authentication
   /auth/delete:
     parameters: []
     delete:
-      summary: ''
+      summary: Delete User Account
       operationId: delete-auth-delete
       responses:
         '204':
@@ -72,43 +78,45 @@ paths:
         '500':
           description: Deletion Failed
       description: Deletes the currently authenticated user account.
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: Authorization
-          description: JSON Web Token
+      parameters: []
       tags:
         - Authentication
+      security:
+        - JWT - Authentication Token: []
   /auth/update:
     parameters: []
-    post:
+    put:
       summary: Update Account Information
-      operationId: post-auth-update
-      responses:
-        '200':
-          description: Update Successful
-      description: Used to update the currently authenticated account with posted information.
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: Authorization
-          description: |
-            JSON Web Token
-      tags:
-        - Authentication
-  /auth/info:
-    get:
-      summary: Current User Information
-      tags: []
+      operationId: put-auth-update
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserAccount'
+                $ref: '#/components/schemas/Luna_Login'
+        '401':
+          description: Unauthorized
+      description: Used to update the currently authenticated account with submitted information.
+      security:
+        - JWT - Authentication Token: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Luna_Login'
+      tags:
+        - Authentication
+  /auth/info:
+    get:
+      summary: Current User Information
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Luna_Login'
       operationId: get-auth-info
       description: Get information about the currently authenticated user.
       parameters:
@@ -117,6 +125,8 @@ paths:
           in: header
           name: Authorization
           description: JSON Web Token
+      tags:
+        - User Info
 components:
   schemas:
     UserOPResponse:
@@ -133,11 +143,15 @@ components:
         - success
       x-tags:
         - Authentication
-    UserAccount:
-      title: UserAccount
+      description: The response object sent by most Luna Auth Requests
+    Luna_Login:
+      title: Luna Login
       type: object
+      x-tags:
+        - Authentication
+      description: Simple User Account Details for a Lunasphere Account
       properties:
-        id:
+        userId:
           type: integer
         username:
           type: string
@@ -152,9 +166,12 @@ components:
       required:
         - username
         - password
-      x-tags:
-        - Authentication
-  securitySchemes: {}
+  securitySchemes:
+    JWT - Authentication Token:
+      type: http
+      scheme: bearer
 tags:
   - name: Authentication
     description: Operations and models used for authentication and authorization of a Lunasphere account.
+  - name: User Info
+    description: Operations and Models used for viewing of public user information.

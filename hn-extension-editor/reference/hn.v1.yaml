@@ -7,13 +7,13 @@ info:
     name: UNLICENSED
   contact:
     name: Joshua Richardson-Noyes
-    email: admiraljrn@outlook.com
+    email: joshua.richardson-noyes@lunasphere.co.uk
     url: lunasphere.co.uk
 servers:
-  - url: 'http://localhost:3000'
-    description: Local Dev
-  - url: 'http://hn.luansphere.co.uk'
+  - url: 'https://hn.luansphere.co.uk'
     description: Production
+  - url: 'http://localhost/api'
+    description: Local Dev
 tags:
   - name: Extension Info
     description: Information about an extension and how it should start-up.
@@ -21,10 +21,20 @@ tags:
     description: Information about computers created/registered to an extension.
   - name: Mission Ops
     description: Information about missions created/registered to an extension.
+  - name: Files
+    description: Models and Operations relating to in-game Computer Files
+  - name: Email
+    description: Models and Operations relating to in-game Emails sent to the player.
+  - name: Attachments
+    description: Models and Operations relating to attachments found at the bottom of emails.
+  - name: Music
+    description: Models and Operations relating to Music files included in a Hacknet extension.
+  - name: Ports
+    description: Models and Operations relating to the Port security of a Hacknet computer.
 paths:
-  /extension/new:
+  /extensions/new:
     post:
-      summary: Create new
+      summary: Create Extension
       operationId: post-extension-new
       responses:
         '200':
@@ -32,37 +42,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtensionInfo'
-      description: Creates a new extension with the specified info object.
+                $ref: '#/components/schemas/Extension_Info'
+      description: Creates a new extension with the uploaded information.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExtensionInfo'
+              $ref: '#/components/schemas/Extension_Info'
             examples: {}
       tags:
         - Extension Info
-  '/extension/update/{id}':
-    parameters:
-      - schema:
-          type: integer
-        name: id
-        in: path
-        required: true
-    post:
-      summary: Update Extension Info
-      operationId: post-extension-update-id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExtensionInfo'
-      description: Updates specified ExtensionInfo with new information.
-      tags:
-        - Extension Info
-  '/extension/{id}':
+      security:
+        - JWT Generated Token: []
+    parameters: []
+  '/extensions/{id}':
     parameters:
       - schema:
           type: integer
@@ -70,7 +63,7 @@ paths:
         in: path
         required: true
     get:
-      summary: Your GET endpoint
+      summary: Get Extension Info
       tags:
         - Extension Info
       responses:
@@ -79,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExtensionInfo'
+                $ref: '#/components/schemas/Extension_Info'
         '404':
           description: Extension specified could not be found.
       operationId: get-extension-id
@@ -87,22 +80,45 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ExtensionInfo'
+              $ref: '#/components/schemas/Extension_Info'
       description: "Fetches the extension info for extension with given ID. Returns it's data."
-  '/extension/delete/{id}':
-    parameters:
-      - schema:
-          type: number
-        name: id
-        in: path
-        required: true
+      security:
+        - JWT Generated Token: []
+    put:
+      summary: Update Extension Info
+      operationId: put-extension-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Extension_Info'
+        '404':
+          description: 'Extension ID not specified, or invalid.'
+      description: Updates Extension at the specified ID with the uploaded information.
+      security:
+        - JWT Generated Token: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Extension_Info'
+      tags:
+        - Extension Info
     delete:
-      summary: ''
-      operationId: delete-extension-delete-id
+      summary: Delete Extension
+      operationId: delete-extension-id
       responses:
         '204':
-          description: Deletion was Successful
-      description: Delete extension from the database with all associated information by the given the ID.
+          description: No Content
+        '400':
+          description: Extension ID not specified or invalid.
+        '401':
+          description: 'This is not your Extension, and thus you cannot delete it.'
+      description: Deletes an extension and all associated data.
+      security:
+        - JWT Generated Token: []
       tags:
         - Extension Info
   /nodes/new:
@@ -111,17 +127,23 @@ paths:
       operationId: post-nodes-new
       responses:
         '200':
-          description: Computer Created Successfully.
-        '404':
-          description: Extension not found
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_CompNode'
       description: Creates new computer for the specified extension with the included information.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ComputerNode'
+              $ref: '#/components/schemas/HN_CompNode'
+        description: Information about the computer being created
       tags:
         - CompNode Ops
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
   '/nodes/{id}':
     parameters:
       - schema:
@@ -139,47 +161,44 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComputerNode'
+                $ref: '#/components/schemas/HN_CompNode'
               examples: {}
           headers: {}
         '404':
           description: Not Found
       operationId: get-nodes-id
       description: Returns information about the specified node under this extension.
-  '/nodes/delete/{id}':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-    delete:
-      summary: ''
-      operationId: delete-nodes-delete-id
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+    put:
+      summary: Update Node Info
+      operationId: put-nodes-id
       responses:
         '200':
           description: OK
-        '404':
-          description: Not Found
-      description: Deletes computer with specified ID under the given extension.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_CompNode'
+      description: Updates the node at the given ID with the uploaded information.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
       tags:
         - CompNode Ops
-  '/nodes/update/{id}':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-    post:
-      summary: Update Computer Info
-      operationId: post-nodes-update-id
+    delete:
+      summary: Delete Node
+      operationId: delete-nodes-id
       responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-      description: 'Updates specified computer with POSTed information, under the current extension.'
+        '204':
+          description: Success
+        '400':
+          description: Node ID not specified or invalid.
+      description: Deletes the Node and all associated data matching the given ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
       tags:
         - CompNode Ops
   /missions/new:
@@ -189,6 +208,12 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Mission'
+        '500':
+          description: Internal Server Error
       description: 'Creates a new mission with the specified information, under the current extension.'
       requestBody:
         content:
@@ -198,45 +223,9 @@ paths:
         description: ''
       tags:
         - Mission Ops
-  '/missions/update/{id}':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-    post:
-      summary: Update Mission Data
-      operationId: post-missions-update-id
-      responses:
-        '200':
-          description: OK
-      description: Updates a mission at the specified ID.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/HN_Mission'
-      tags:
-        - Mission Ops
-  '/missions/delete/{id}':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-    delete:
-      summary: Delete Mission
-      operationId: delete-missions-delete-id
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-      description: 'Deletes a mission with the specified ID, under the current extension.'
-      tags:
-        - Mission Ops
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
   '/missions/{id}':
     parameters:
       - schema:
@@ -256,15 +245,493 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HN_Mission'
+        '400':
+          description: Invalid or unspecified Mission ID.
+        '404':
+          description: Could not find mission with specified ID.
       operationId: get-missions-id
-      description: 'Fetches mission details for mission with the given ID, under the current extension.'
+      description: Retrieves Mission information for mission with the given mission ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+    put:
+      summary: Update Mission Information
+      operationId: put-missions-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Mission'
+        '400':
+          description: Invalid or unspecified Mission ID.
+      description: Updates a mission at the specified ID with the uploaded information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Mission'
+        description: The updated Mission information.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+    delete:
+      summary: Delete Mission
+      operationId: delete-missions-id
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Mission ID not specified or not valid.
+      description: Deletes a mission and all associated data matching the given mission ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+  /music/list:
+    get:
+      summary: Get Music Track List
+      tags:
+        - Music
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HN_Music'
+      operationId: get-music-list
+      description: Retrieves a list of music tracks uplaoded by the current user.
+      security:
+        - JWT Generated Token: []
+  '/music/play/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Play Music Track
+      tags:
+        - Music
+      responses:
+        '200':
+          description: OK
+          content:
+            application/ogg:
+              schema: {}
+        '404':
+          description: Music Track could not be found.
+      operationId: get-music-play-id
+      description: Retrieves the actual audio file for audio matching the specified Music ID.
+      security:
+        - JWT Generated Token: []
+  /music/new:
+    post:
+      summary: Upload new Track
+      operationId: post-music-new
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Music'
+      description: Uploads a new track with the specified information and uploaded Audio (OGG) file.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ownerId:
+                  type: integer
+                title:
+                  type: string
+        description: 'Information about the track, followed by the uploaded chunk data.'
+      security:
+        - JWT Generated Token: []
+      tags:
+        - Music
+  '/music/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    put:
+      summary: Update Track Info
+      operationId: put-music-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Music'
+        '400':
+          description: Track could not be found or you do not have permission to edit it.
+      description: Updates information about the music track matching the given ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Music'
+      security:
+        - JWT Generated Token: []
+      tags:
+        - Music
+    delete:
+      summary: Delete Music Track
+      operationId: delete-music-id
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: No TrackID specified to delete.
+      description: Deletes a music track matching the specified ID.
+      tags:
+        - Music
+  '/nodes/files/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Fetch File Information
+      tags:
+        - CompNode Ops
+        - Files
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_CompFile'
+        '400':
+          description: File ID not specified or is invalid.
+      operationId: get-nodes-files-id
+      description: Gets information about a file matching the given ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+    put:
+      summary: Update File Information
+      operationId: put-nodes-files-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_CompFile'
+      parameters: []
+      description: 'Updates an existing file at the specified ID, using file data.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_CompFile'
+        description: The updated information about this file.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - CompNode Ops
+        - Files
+    delete:
+      summary: Delete Computer File
+      operationId: delete-nodes-files-id
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: 'No File ID specified, or invalid.'
+      description: 'Deletes the file matching the specified ID, and all associated data.'
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - CompNode Ops
+        - Files
+  '/nodes/ports/list/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get Computer Ports
+      tags:
+        - CompNode Ops
+        - Ports
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_PortSummary'
+        '400':
+          description: 'Node ID not specified, or was invalid.'
+      operationId: get-nodes-ports-list-id
+      description: Retrieves a list of ports that have been mapped to the computer with specified ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+  /missions/email/new:
+    post:
+      summary: Create new Email
+      operationId: post-missions-email-new
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Email'
+        '500':
+          description: Internal Server Error
+      description: Creates a new email with submitted information.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+  '/missions/email/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Fetch Email Info
+      tags:
+        - Mission Ops
+        - Email
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Email'
+      operationId: get-missions-email-id
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Email'
+      description: Retrieves the information about the email matching the ID specified.
+    put:
+      summary: Update Email Info
+      operationId: put-missions-email-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_Email'
+        '400':
+          description: 'Email ID not specified, or is invalid.'
+      description: Updates the email matching the specified ID with provided information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_Email'
+        description: Updated Email information
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+        - Email
+    delete:
+      summary: Delete An Email
+      operationId: delete-missions-email-id
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: 'Email ID not specified, or is invalid.'
+      description: Deletes email matching the specified ID.
+      tags:
+        - Mission Ops
+        - Email
+  /missions/email/attachment/new:
+    post:
+      summary: Create new Email Attachment
+      operationId: post-missions-email-attachment-new
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_EmailAttachment'
+        '500':
+          description: Internal Server Error
+      description: Creates a brand new Email Attachment using the provided information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_EmailAttachment'
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
+  '/missions/email/attachment/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Get Email Attachment
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_EmailAttachment'
+      operationId: get-missions-email-attachment-id
+      description: Retrieves information about the email attachment matching the specified ID.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
+    put:
+      summary: Update Email Attachment
+      operationId: put-missions-email-attachment-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HN_EmailAttachment'
+      description: 'Updates an existing Email Attachment with the provided information, matching the specified ID.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HN_EmailAttachment'
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
+    delete:
+      summary: Delete Email Attachment
+      operationId: delete-missions-email-attachment-id
+      responses:
+        '204':
+          description: No Content
+      description: Deletes an email attachment matching the specified ID.
+      parameters: []
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
+  /missions/email/attachment/map:
+    get:
+      summary: Map Attachment to Email
+      tags: []
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: (Email or Attachment) ID not specified or is invalid.
+      operationId: map-missions-email-attachment
+      description: Creates a link between an attachment and an email.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      parameters:
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: email
+          description: Email ID the attachment is linked to
+          required: true
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: attachment
+          description: Attachment ID this link is to
+          required: true
+  /missions/email/attachment/unmap:
+    get:
+      summary: Unmap Attachment from Email
+      tags: []
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: (Email or Attachment) ID not specified or is invalid.
+      operationId: unmap-missions-email-attachment
+      description: Removes a link between an attachment and an email.
+      security:
+        - JWT Generated Token: []
+        - ExtensionID: []
+      parameters:
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: email
+          description: Email ID the attachment is linked to
+          required: true
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: attachment
+          description: Attachment ID this link is to
+          required: true
 components:
   schemas:
-    ExtensionInfo:
-      title: ExtensionInfo
+    Extension_Info:
+      title: Extension_Info
       type: object
       x-tags:
         - Extension Info
+      description: ''
       properties:
         id:
           type: integer
@@ -272,12 +739,12 @@ components:
           type: string
         allow_saves:
           type: boolean
-        starting_comps:
+        startingNodes:
           type: array
           items:
-            $ref: '#/components/schemas/ComputerNode'
-        starting_mission:
-          $ref: '#/components/schemas/HN_Mission'
+            type: number
+        startingMissionId:
+          type: number
         starting_actions:
           type: string
         description:
@@ -287,10 +754,8 @@ components:
           items: {}
         theme:
           type: string
-        starting_music:
-          type: string
-        sequencer_info:
-          type: object
+        startingMusic:
+          type: number
         workshop_description:
           type: string
         workshop_language:
@@ -300,9 +765,7 @@ components:
         language:
           type: integer
         workshop_tags:
-          type: array
-          items:
-            type: string
+          type: string
         workshop_img:
           type: string
         workshop_id:
@@ -310,10 +773,10 @@ components:
       required:
         - name
         - language
-      description: ''
-    ComputerNode:
-      title: ComputerNode
+    HN_CompNode:
+      title: HN_CompNode
       type: object
+      description: Information about a computer inside of a hacknet extension
       properties:
         id:
           type: string
@@ -321,13 +784,13 @@ components:
           type: string
         ip:
           type: string
-        security:
+        securityLevel:
           type: integer
         allowsDefaultBootModule:
           type: boolean
         icon:
           type: string
-        type:
+        typeId:
           type: integer
         adminPass:
           type: string
@@ -338,32 +801,26 @@ components:
         ports:
           type: array
           items:
-            type: integer
+            $ref: '#/components/schemas/HN_Port'
         portsForCrack:
           type: integer
         traceTime:
           type: number
         admin:
           $ref: '#/components/schemas/ComputerAdminInfo'
-        portRemap:
-          type: array
-          items:
-            $ref: '#/components/schemas/ComputerPortRemap'
         tracker:
-          type: string
-        dlinks:
-          type: array
-          items:
-            type: string
+          type: boolean
         files:
           type: array
           items:
-            $ref: '#/components/schemas/ComputerFile'
+            $ref: '#/components/schemas/HN_CompFile'
+        nodeId:
+          type: number
       required:
         - id
         - name
         - ip
-        - security
+        - securityLevel
         - icon
     ComputerAccount:
       title: ComputerAccount
@@ -385,25 +842,29 @@ components:
           type: boolean
         isSuper:
           type: boolean
-    ComputerPortRemap:
-      title: ComputerPortRemap
+    HN_PortRemap:
+      title: HN_PortRemap
       type: object
       properties:
-        type:
-          type: string
+        portId:
+          type: number
         port:
           type: integer
-    ComputerFile:
-      title: ComputerFile
+        nodeId:
+          type: integer
+    HN_CompFile:
+      title: HN_CompFile
       type: object
+      description: A single file intended to be placed onto a computer.
       properties:
+        fileId:
+          type: number
         path:
           type: string
         name:
           type: string
         contents:
           type: string
-      description: A single file intended to be placed onto a computer.
     HN_Mission:
       title: HN_Mission
       type: object
@@ -477,10 +938,13 @@ components:
     HN_Email:
       title: HN_Email
       type: object
+      description: An email to be sent to the player in-game.
       properties:
+        emailId:
+          type: integer
         sender:
           type: string
-        subject:
+        subjec:
           type: string
         body:
           type: string
@@ -488,7 +952,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HN_EmailAttachment'
-      description: An email to be sent to the player in-game.
     HN_EmailAttachment:
       title: HN_EmailAttachment
       type: object
@@ -520,4 +983,46 @@ components:
           type: string
       x-tags:
         - Mission Data
-  securitySchemes: {}
+    HN_Port:
+      title: HN_Port
+      type: object
+      properties:
+        portId:
+          type: number
+        port:
+          type: number
+        portType:
+          type: string
+    HN_PortSummary:
+      title: HN_PortSummary
+      type: object
+      description: 'A summary of ports, and port remaps that have been assigned a particular computer.'
+      properties:
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/HN_Port'
+        remaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/HN_PortRemap'
+    HN_Music:
+      title: HN_Music
+      type: object
+      description: A music track uploaded for a Hacknet Extension.
+      properties:
+        musicId:
+          type: integer
+        ownerId:
+          type: integer
+        title:
+          type: string
+  securitySchemes:
+    JWT Generated Token:
+      type: http
+      scheme: bearer
+      description: ''
+    ExtensionID:
+      name: extId
+      type: apiKey
+      in: cookie
