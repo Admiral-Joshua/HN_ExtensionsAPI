@@ -169,6 +169,9 @@ router.put('/:id', (req, res) => {
                             })
                     })
             })
+    } else {
+        res.status(404);
+        res.send("Extension ID not specified, or invalid.");
     }
 })
 

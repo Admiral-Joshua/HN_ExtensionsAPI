@@ -80,6 +80,9 @@ router.put('/:id', (req, res) => {
             .then(() => {
                 res.json(emailInfo);
             });
+    } else {
+        res.status(400);
+        res.send("Email ID not specified, or is invalid.")
     }
 });
 
@@ -110,6 +113,9 @@ router.delete('/:id', (req, res) => {
                         res.sendStatus(204);
                     });
             });
+    } else {
+        res.status(400);
+        res.send("Email ID not specified, or is invalid.")
     }
 })
 
