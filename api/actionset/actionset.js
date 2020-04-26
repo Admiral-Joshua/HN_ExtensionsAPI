@@ -33,21 +33,30 @@ router.get('/:id', (req, res) => {
 
     let actionSetId = parseInt(req.params.id);
 
-    knex("hn_ActionSet")
-        .where({ actionSetId: actionSetId })
-        .first()
-        .then(actionSetInfo => {
-            // Query for actions..
 
-            knex("LN_action_set")
-                .select('hn_Action.*')
-                .where({ actionSetId: actionSetId })
-                .join('hn_Action', { 'LN_action_set.actionId': 'hn_Action.actionId' })
-                .then(actions => {
-                    actionSetInfo.actions = actions;
-                })
+    if (!isNaN(actionSetId)) {
 
-        });
+        knex("hn_ActionSet")
+            .where({ actionSetId: actionSetId })
+            .first()
+            .then(actionSetInfo => {
+                // Query for actions..
+
+                knex("LN_action_set")
+                    .select('hn_Action.*')
+                    .where({ actionSetId: actionSetId })
+                    .join('hn_Action', { 'LN_action_set.actionId': 'hn_Action.actionId' })
+                    .then(actions => {
+                        actionSetInfo.actions = actions;
+
+                        res.json(actionSetInfo);
+                    })
+
+            });
+    } else {
+        res.status(400);
+        res.send("Action Set ID not specified, or invalid.");
+    }
 });
 
 // POST
@@ -58,9 +67,11 @@ router.post('/new', (req, res) => {
 
     let currentExtension = req.cookies.extId;
 
+    let actionSetInfo = req.body;
+
     knex("hn_ActionSet")
         .insert({
-            name: actionSetInfo
+            name: actionSetInfo.name
         })
         .returning("actionSetId")
         .then(ids => {
@@ -72,6 +83,52 @@ router.post('/new', (req, res) => {
             }
         });
 });
+
+// PUT
+// '/:id'
+// Updates action set with specified information, and corresponding links to actions
+router.put('/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let actionSetId = parseInt(req.params.id);
+
+    let actionSetInfo = req.body;
+
+    if (!isNaN(actionSetId)) {
+        knex("hn_ActionSet")
+            .update({
+                name: actionSetInfo
+            })
+            .where({
+                actionSetId: actionSetId
+            })
+            .then(() => {
+
+                // Clear all links to existing Actions
+                knex("LN_action_set")
+                    .where({
+                        actionSetId: actionSetId
+                    })
+                    .del()
+                    .then(() => {
+
+                        // Recreate links for what is left.
+                        let reqLinks = actionSetInfo.actions.map(action => {
+                            return { actionSetId: actionSetId, actionId: action.actionId }
+                        });
+
+                        knex("LN_action_set")
+                            .insert(reqLinks)
+                            .then(() => {
+                                res.json(actionSetInfo);
+                            })
+                    })
+            })
+    } else {
+        res.status(400);
+        res.send("Action Set ID not specified or invalid.");
+    }
+})
 
 // DELETE
 // '/:id'

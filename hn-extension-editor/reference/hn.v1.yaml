@@ -4,13 +4,13 @@ info:
   version: '1.0'
   description: A set of RESTful API urls to be used for creation of and editing Hacknet Extensions.
   license:
-    name: UNLICENSED
+    name: Copyright © 2020 Lunasphere Entertainment. All rights reserved.
   contact:
     name: Joshua Richardson-Noyes
     email: joshua.richardson-noyes@lunasphere.co.uk
     url: lunasphere.co.uk
 servers:
-  - url: 'https://hn.luansphere.co.uk'
+  - url: 'https://hn.luansphere.co.uk/api'
     description: Production
   - url: 'http://localhost/api'
     description: Local Dev
@@ -669,7 +669,10 @@ paths:
   /missions/email/attachment/map:
     get:
       summary: Map Attachment to Email
-      tags: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
       responses:
         '204':
           description: No Content
@@ -698,7 +701,10 @@ paths:
   /missions/email/attachment/unmap:
     get:
       summary: Unmap Attachment from Email
-      tags: []
+      tags:
+        - Mission Ops
+        - Email
+        - Attachments
       responses:
         '204':
           description: No Content

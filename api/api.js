@@ -1,7 +1,18 @@
 const router = require("express").Router();
 const secValidator = require("./auth_validate/validate");
-
+const jwt = require("express-jwt");
 const extensionsAPI = require("./extensions/extensions");
+
+// Load up config files
+// Application Configuration
+const config = require("../config.json");
+
+// Authorization - Don't let non-authenticated users work on extensions.
+router.use(jwt({
+    secret: config.security.secret,
+    strict: false
+}));
+
 
 // Extensions Router
 // Used for fetching and manipulating extension info

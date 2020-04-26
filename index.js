@@ -3,7 +3,6 @@ const express = require("express");
 const knex = require("knex");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
-const jwt = require("express-jwt");
 const fs = require("fs");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -40,6 +39,9 @@ fs.exists(`${__dirname}/user_data`, (exists) => {
 
 const app = express();
 
+// Static Routing for Angular v9 Front-end Application
+app.use(express.static(`${__dirname}/app`));
+
 // Allow some CORS
 //app.options('*', cors()) // include before other routes
 app.use(cors(corsOptions));
@@ -48,8 +50,8 @@ app.use(cors(corsOptions));
 app.set('db', db);
 app.set('path', `${__dirname}`);
 
-// Parse POST body data.
-app.use(bodyParser());
+// Parse POST body data.6
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Parse Cookie Data from the client
 app.use(cookieParser());
@@ -58,16 +60,6 @@ app.use(cookieParser());
 app.use(fileUpload({
     limits: { fileSize: 5 * 1024 * 1024 } // Limit to 5MB
 }));
-
-
-
-// Authorization - Don't let non-authenticated users work on extensions.
-app.use(jwt({
-    secret: config.security.secret,
-    strict: false
-}));
-
-//.unless({ path: [/api\/music\/play\/[0-9]*/] })
 
 // App Handler in the event the user has not yet authenticated
 app.use((err, req, res, next) => {
@@ -89,3 +81,5 @@ let port = process.env.PORT || 80;
 app.listen(port, '0.0.0.0', () => {
     console.log(`HN Extensions API -- Started @0.0.0.0:${port}`)
 });
+
+//module.exports = app;
