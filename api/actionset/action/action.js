@@ -45,23 +45,23 @@ router.post('/new', (req, res) => {
 
     knex("hn_Action")
         .insert({
-            actionTypeId: actionInfo.actionTypeId,
-            requirementId: actionInfo.requirementId,
-            loadActionId: actionInfo.loadActionId,
-            loadMissionId: actionInfo.loadMissionId,
-            switchThemeId: actionInfo.switchThemeId,
-            fileId: actionInfo.fileId,
-            ircMessageId: actionInfo.ircMessageId,
-            delayCompId: actionInfo.delayCompId,
-            Delay: actionInfo.Delay,
-            targetCompId: actionInfo.targetCompId,
-            functionId: actionInfo.functionId,
-            functionValue: actionInfo.functionValue
+            loadActionSetId: actionInfo.loadActionSetId > 0 ? actionInfo.loadActionSetId : undefined,
+            loadMissionId: actionInfo.loadMissionId > 0 ? actionInfo.loadMissionId : undefined,
+            switchThemeId: actionInfo.switchThemeId > 0 ? actionInfo.switchThemeId : undefined,
+            fileId: actionInfo.fileId > 0 ? actionInfo.fileId : undefined,
+            ircMessageId: actionInfo.ircMessageId > 0 ? actionInfo.ircMessageId : undefined,
+            delayCompId: actionInfo.delayCompId > 0 ? actionInfo.delayCompId : undefined,
+            Delay: actionInfo.Delay > 0 ? actionInfo.Delay : undefined,
+            targetCompId: actionInfo.targetCompId > 0 ? actionInfo.targetCompId : undefined,
+            functionId: actionInfo.functionId > 0 ? actionInfo.functionId : undefined,
+            functionValue: actionInfo.functionValue > 0 ? actionInfo.functionValue : undefined
         })
         .returning("actionId")
         .then(ids => {
             if (ids.length > 0) {
                 actionInfo.actionId = ids[0];
+
+                res.json(actionInfo);
             } else {
                 res.sendStatus(500);
             }
@@ -82,9 +82,9 @@ router.put('/:id', (req, res) => {
     if (!isNaN(actionId)) {
         knex("hn_Action")
             .update({
-                actionTypeId: actionInfo.actionTypeId,
-                requirementId: actionInfo.requirementId,
-                loadActionId: actionInfo.loadActionId,
+                actionId: actionInfo.actionId,
+                // requirementId: actionInfo.requirementId,
+                loadActionSetId: actionInfo.loadActionSetId,
                 loadMissionId: actionInfo.loadMissionId,
                 switchThemeId: actionInfo.switchThemeId,
                 fileId: actionInfo.fileId,

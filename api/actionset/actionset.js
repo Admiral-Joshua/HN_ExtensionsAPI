@@ -11,12 +11,13 @@ router.get('/summary', (req, res) => {
     let currentExtension = parseInt(req.cookies.extId);
 
     knex("hn_ActionSet")
-        .select('hn_ActionSet.actionSetId', 'hn_ActionSet.name', knex.raw('COUNT("hn_Action.actionId") as count'))
+        .select('hn_ActionSet.actionSetId', 'hn_ActionSet.name', knex.raw('COUNT("hn_Action"."actionId") as count'))
         .join("LN_action_set", { "LN_action_set.actionSetId": "hn_ActionSet.actionSetId" })
         .join("hn_Action", { "hn_Action.actionId": "LN_action_set.actionId" })
         .where({
             'hn_ActionSet.extensionId': currentExtension
         })
+        .groupBy('hn_ActionSet.actionSetId')
         .then(rows => {
             res.json(rows);
         })
@@ -68,16 +69,27 @@ router.post('/new', (req, res) => {
     let currentExtension = req.cookies.extId;
 
     let actionSetInfo = req.body;
+    let actions = req.body.actions;
 
     knex("hn_ActionSet")
         .insert({
-            name: actionSetInfo.name
+            name: actionSetInfo.name,
+            extensionId: currentExtension
         })
         .returning("actionSetId")
         .then(ids => {
             if (ids.length > 0) {
                 actionSetInfo.actionSetId = ids[0];
-                res.json(actionSetInfo);
+
+                // Create links to actions
+                let links = actions.map(action => {
+                    return { actionId: action.actionId, actionSetId: ids[0] };
+                });
+                knex("LN_action_set")
+                    .insert(links)
+                    .then(() => {
+                        res.json(actionSetInfo);
+                    })
             } else {
                 res.sendStatus(500);
             }
@@ -93,6 +105,7 @@ router.put('/:id', (req, res) => {
     let actionSetId = parseInt(req.params.id);
 
     let actionSetInfo = req.body;
+    let actions = req.body.actions;
 
     if (!isNaN(actionSetId)) {
         knex("hn_ActionSet")
@@ -113,7 +126,7 @@ router.put('/:id', (req, res) => {
                     .then(() => {
 
                         // Recreate links for what is left.
-                        let reqLinks = actionSetInfo.actions.map(action => {
+                        let reqLinks = actions.map(action => {
                             return { actionSetId: actionSetId, actionId: action.actionId }
                         });
 

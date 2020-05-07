@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS "hn_ActionType" (
 
 CREATE TABLE IF NOT EXISTS "hn_ActionSet" (
   "actionSetId" SERIAL PRIMARY KEY,
+  "extensionId" INT NOT NULL,
   "name" text
 );
 
@@ -359,6 +360,8 @@ ALTER TABLE "hn_Action" ADD FOREIGN KEY ("ircMessageId") REFERENCES "hn_ircMessa
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("delayCompId") REFERENCES "hn_CompNode" ("nodeId");
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("targetCompId") REFERENCES "hn_CompNode" ("nodeId");
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("functionId") REFERENCES "hn_Function" ("functionId");
+
+ALTER TABLE "hn_ActionSet" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 
 ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("actionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
 ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("requirementId") REFERENCES "hn_ActionRequirement" ("requirementId");

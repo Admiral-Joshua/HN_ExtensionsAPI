@@ -1,0 +1,16 @@
+{
+    "name": "hn_toolkit",
+    "version": "1.0.0",
+    "description": "Command line toolkit for ExtensionsAPI to use for building and importing.",
+    "main": "builders/builder.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Lunasphere Entertainment",
+    "license": "UNLICENSED",
+    "dependencies": {
+        "knex": "^0.21.1",
+        "pg": "^8.0.3",
+        "xmlbuilder2": "^2.1.2"
+    }
+}

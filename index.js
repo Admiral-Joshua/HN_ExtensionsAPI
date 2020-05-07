@@ -51,7 +51,8 @@ app.set('db', db);
 app.set('path', `${__dirname}`);
 
 // Parse POST body data.6
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser());
 
 // Parse Cookie Data from the client
 app.use(cookieParser());
