@@ -297,6 +297,14 @@ CREATE TABLE IF NOT EXISTS "hn_Theme" (
   "scanlinesColor" text
 );
 
+CREATE TABLE IF NOT EXISTS "luna_Users" (
+	"userId" SERIAL PRIMARY KEY,
+	"username" text,
+	"password" varchar(255),
+	"salt" varchar(24),
+	"email" text
+);
+
 ALTER TABLE "user_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 
 ALTER TABLE "extension_Info" ADD FOREIGN KEY ("languageId") REFERENCES "extension_Language" ("langId");
