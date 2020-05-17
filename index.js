@@ -62,6 +62,9 @@ app.use(fileUpload({
     limits: { fileSize: 5 * 1024 * 1024 } // Limit to 5MB
 }));
 
+// Setup API url.
+app.use('/api', API);
+
 // App Handler in the event the user has not yet authenticated
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
@@ -73,9 +76,6 @@ app.use((err, req, res, next) => {
         res.send("Source address is forbidden access by CORS.");
     }
 });
-
-// Setup API url.
-app.use('/api', API);
 
 // Start the server.
 let port = process.env.PORT || 80;

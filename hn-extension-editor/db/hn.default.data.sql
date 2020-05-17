@@ -150,3 +150,19 @@ INSERT INTO "hn_Function" ("funcDisplayName", "funcName") VALUES
 ('Play Custom Song', 'playCustomSong'),
 ('Play Custom Song Immediately', 'playCustomSongImmediatley')
 ON CONFLICT("functionId") DO NOTHING;
+
+-- hn_ConditionType
+-- Defines what types of conditions are available.
+INSERT INTO "hn_ConditionType" ("typeText") VALUES 
+('Instantly'),
+('OnConnect'),
+('HasFlags'),
+('OnAdminGained'),
+('DoesNotHaveFlags'),
+('OnDisconnect')
+ON CONFLICT("typeId") DO NOTHING;
+
+-- hn_ThemeLayouts
+-- Defines all layouts currently supported for themes in HACKNET
+INSERT INTO "hn_ThemeLayout" ("LayoutName") VALUES
+('blue'), ('green'), ('white'), ('mint'), ('greencompact'), ('riptide'), ('colamaeleon'), ('riptide2');

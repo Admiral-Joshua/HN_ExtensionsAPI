@@ -5,11 +5,14 @@ const extensionsAPI = require("./extensions/extensions");
 
 // Load up config files
 // Application Configuration
-const config = require("../config.json");
+const secret = require(`${__dirname}/../config.json`).security.secret;
+
+// User Accounts - Login / Register endpoints
+router.use('/auth', require("./auth/auth"));
 
 // Authorization - Don't let non-authenticated users work on extensions.
 router.use(jwt({
-    secret: config.security.secret,
+    secret: secret,
     strict: false
 }));
 

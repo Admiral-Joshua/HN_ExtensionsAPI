@@ -1,5 +1,8 @@
 const router = require("express").Router();
 
+// Layouts API
+router.use('/layouts', require("./layout/layout"));
+
 // GET
 // '/list/:id'
 // Retrieves list of themes for the extension currently being edited.
@@ -11,7 +14,7 @@ router.get('/list', (req, res) => {
     if (!isNaN(currentExtension)) {
 
         knex("hn_Theme")
-            .select("themeId", "id", "LayoutName")
+            .join("hn_ThemeLayout", { "hn_Theme.layoutId": "hn_ThemeLayout.layoutId" })
             .where({ extensionId: currentExtension })
             .then(rows => {
                 res.json(rows);
@@ -66,10 +69,9 @@ router.post('/new', (req, res) => {
     knex("hn_Theme")
         .insert({
             extensionId: currentExtension,
-
-            LayoutName: themeInfo.LayoutName,
+            id: themeInfo.id,
+            layoutId: themeInfo.layoutId,
             BackgroundImagePath: themeInfo.BackgroundImagePath,
-
             defaultHighlightColor: themeInfo.defaultHighlightColor,
             defaultTopBarColor: themeInfo.defaultTopBarColor,
             moduleColorSolidDefault: themeInfo.moduleColorSolidDefault,
@@ -127,9 +129,9 @@ router.put('/:id', (req, res) => {
 
         knex("hn_Theme")
             .update({
-                LayoutName: themeInfo.LayoutName,
+                id: themeInfo.id,
+                layoutId: themeInfo.layoutId,
                 BackgroundImagePath: themeInfo.BackgroundImagePath,
-
                 defaultHighlightColor: themeInfo.defaultHighlightColor,
                 defaultTopBarColor: themeInfo.defaultTopBarColor,
                 moduleColorSolidDefault: themeInfo.moduleColorSolidDefault,

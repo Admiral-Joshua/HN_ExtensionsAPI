@@ -171,7 +171,9 @@ CREATE TABLE IF NOT EXISTS "hn_MissionGoal" (
   "gpa" text,
   "mailServer" text,
   "recipient" text,
-  "subject" text
+  "subject" text,
+  "target" text,
+  "delay" float
 );
 
 CREATE TABLE IF NOT EXISTS "hn_Faction" (
@@ -183,53 +185,17 @@ CREATE TABLE IF NOT EXISTS "hn_Faction" (
   "actionSetId" int
 );
 
-CREATE TABLE IF NOT EXISTS "hn_ActionType" (
-  "typeId" SERIAL PRIMARY KEY,
-  "typeText" text
-);
-
-CREATE TABLE IF NOT EXISTS "hn_ActionSet" (
-  "actionSetId" SERIAL PRIMARY KEY,
-  "extensionId" INT NOT NULL,
-  "name" text
-);
-
-CREATE TABLE IF NOT EXISTS "hn_Action" (
-  "actionId" SERIAL PRIMARY KEY,
-  "typeId" int,
-  "loadActionSetId" int,
-  "loadMissionId" int,
-  "switchThemeId" int,
-  "fileId" int,
-  "ircMessageId" int,
-  "delayCompId" int,
-  "Delay" real,
-  "targetCompId" int,
-  "functionId" int,
-  "functionValue" text
-);
-
 CREATE TABLE IF NOT EXISTS "hn_Function" (
   "functionId" SERIAL PRIMARY KEY,
   "funcDisplayName" text,
   "funcName" text
 );
 
-CREATE TABLE IF NOT EXISTS "LN_action_reqs" (
-    "actionSetId" int,
-    "requirementId" int
-);
-
-CREATE TABLE IF NOT EXISTS "LN_action_set" (
-    "actionSetId" int,
-    "actionId" int
-);
-
-CREATE TABLE IF NOT EXISTS "hn_ActionRequirement" (
-  "requirementId" SERIAL PRIMARY KEY,
-  "flag" text,
-  "value" int
-);
+--CREATE TABLE IF NOT EXISTS "hn_ActionRequirement" (
+--  "requirementId" SERIAL PRIMARY KEY,
+--  "flag" text,
+--  "value" int
+--);
 
 CREATE TABLE IF NOT EXISTS "user_Extension" (
   "userId" int,
@@ -259,12 +225,17 @@ CREATE TABLE IF NOT EXISTS "ln_Comp_Dlink" (
 	"destNodeId" int
 );
 
+CREATE TABLE IF NOT EXISTS "hn_ThemeLayout" (
+	"layoutId" SERIAL PRIMARY KEY,
+	"LayoutName" text
+);
+
 -- Themes Tables
 CREATE TABLE IF NOT EXISTS "hn_Theme" (
   "themeId" SERIAL PRIMARY KEY,
+  "id" text,
   "extensionId" int,
-
-  "LayoutName" text,
+  "layoutId" int,
   "BackgroundImagePath" text,
   "defaultHighlightColor" text,
   "defaultTopBarColor" text,
@@ -297,6 +268,74 @@ CREATE TABLE IF NOT EXISTS "hn_Theme" (
   "scanlinesColor" text
 );
 
+-- ActionCondition table defines conditions set out for action sets.
+CREATE TABLE IF NOT EXISTS "hn_ActionCondition" (
+	"conditionId" SERIAL PRIMARY KEY,
+	"actionSetId" int,
+	"typeId" int,
+	"needsMissionComplete" boolean,
+	"requiredFlags" text,
+	"targetNodeId" int
+);
+	
+CREATE TABLE IF NOT EXISTS "hn_ConditionType" (
+	"typeId" SERIAL PRIMARY KEY,
+	"typeText" text
+);
+
+CREATE TABLE IF NOT EXISTS "hn_Action" (
+  "actionId" SERIAL PRIMARY KEY,
+  "conditionId" int, -- defines a condition this action belongs to.
+  "typeId" int,
+  "loadActionSetId" int,
+  "loadMissionId" int,
+  "switchThemeId" int,
+  "fileId" int,
+  "ircMessageId" int,
+  "delayCompId" int,
+  "Delay" real,
+  "targetCompId" int,
+  "functionId" int,
+  "functionValue" text
+);
+
+CREATE TABLE IF NOT EXISTS "hn_ActionType" (
+  "typeId" SERIAL PRIMARY KEY,
+  "typeText" text
+);
+
+CREATE TABLE IF NOT EXISTS "hn_ActionSet" (
+  "actionSetId" SERIAL PRIMARY KEY,
+  "extensionId" INT NOT NULL,
+  "name" text
+);
+
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("typeId") REFERENCES "hn_ActionType" ("typeId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("loadActionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("loadMissionId") REFERENCES "hn_Mission" ("missionId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("switchThemeId") REFERENCES "hn_Theme" ("themeId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("fileId") REFERENCES "hn_CompFile" ("fileId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("ircMessageId") REFERENCES "hn_ircMessage" ("ircMessageId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("delayCompId") REFERENCES "hn_CompNode" ("nodeId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("targetCompId") REFERENCES "hn_CompNode" ("nodeId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("functionId") REFERENCES "hn_Function" ("functionId");
+
+ALTER TABLE "hn_ActionSet" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
+
+-- CREATE TABLE IF NOT EXISTS "LN_action_set" (
+--    "actionSetId" int,
+--    "actionId" int
+-- );
+
+ALTER TABLE "hn_ActionCondition" ADD FOREIGN KEY ("typeId") REFERENCES "hn_ConditionType" ("typeId");
+ALTER TABLE "hn_ActionCondition" ADD FOREIGN KEY ("targetNodeId") REFERENCES "hn_CompNode" ("nodeId");
+ALTER TABLE "hn_ActionCondition" ADD FOREIGN KEY ("actionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
+
+ALTER TABLE "hn_Theme" ADD FOREIGN KEY ("layoutId") REFERENCES "hn_ThemeLayout" ("layoutId");
+
+ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("actionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
+ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("requirementId") REFERENCES "hn_ActionRequirement" ("requirementId");
+
 CREATE TABLE IF NOT EXISTS "luna_Users" (
 	"userId" SERIAL PRIMARY KEY,
 	"username" text,
@@ -306,6 +345,7 @@ CREATE TABLE IF NOT EXISTS "luna_Users" (
 );
 
 ALTER TABLE "user_Extension" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
+ALTER TABLE "user_Extension" ADD FOREIGN KEY ("userId") REFERENCES "luna_Users" ("userId");
 
 ALTER TABLE "extension_Info" ADD FOREIGN KEY ("languageId") REFERENCES "extension_Language" ("langId");
 ALTER TABLE "extension_Info" ADD FOREIGN KEY ("startingThemeId") REFERENCES "hn_Theme" ("themeId");
@@ -358,21 +398,6 @@ ALTER TABLE "hn_Theme" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Inf
 
 ALTER TABLE "hn_Faction" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 ALTER TABLE "hn_Faction" ADD FOREIGN KEY ("actionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
-
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("typeId") REFERENCES "hn_ActionType" ("typeId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("loadActionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("loadMissionId") REFERENCES "hn_Mission" ("missionId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("switchThemeId") REFERENCES "hn_Theme" ("themeId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("fileId") REFERENCES "hn_CompFile" ("fileId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("ircMessageId") REFERENCES "hn_ircMessage" ("ircMessageId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("delayCompId") REFERENCES "hn_CompNode" ("nodeId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("targetCompId") REFERENCES "hn_CompNode" ("nodeId");
-ALTER TABLE "hn_Action" ADD FOREIGN KEY ("functionId") REFERENCES "hn_Function" ("functionId");
-
-ALTER TABLE "hn_ActionSet" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
-
-ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("actionSetId") REFERENCES "hn_ActionSet" ("actionSetId");
-ALTER TABLE "LN_action_reqs" ADD FOREIGN KEY ("requirementId") REFERENCES "hn_ActionRequirement" ("requirementId");
 
 ALTER TABLE "hn_ircMessage" ADD FOREIGN KEY ("authorId") REFERENCES "hn_ircUser" ("ircUserId");
 ALTER TABLE "hn_ircUser" ADD FOREIGN KEY ("nodeId") REFERENCES "hn_CompNode" ("nodeId");

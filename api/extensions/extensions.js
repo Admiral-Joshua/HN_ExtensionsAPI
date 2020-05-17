@@ -88,32 +88,48 @@ router.post('/new', (req, res) => {
 
     // DB Insert
     knex
-        .insert(extInfo)
+        .insert({
+            "extensionName": extInfo.extensionName,
+            "languageId": extInfo.languageId,
+            "allowSaves": extInfo.allowSaves,
+            "description": extInfo.description,
+            "startingThemeId": extInfo.startingThemeId,
+            "startingMusic": extInfo.startingMusic,
+            "startingMissionId": extInfo.startingMissionId,
+            "workshop_description": extInfo.workshop_description,
+            "workshop_language": extInfo.workshop_language,
+            "workshop_visibility": extInfo.workshop_visibility,
+            "workshop_tags": extInfo.workshop_tags,
+            "workshop_img": extInfo.workshop_img,
+            "workshop_id": extInfo.workshop_id
+        })
         .returning("extensionId")
         .into("extension_Info")
         .then(ids => {
             extInfo.extensionId = ids[0];
 
-            // Check for a list of NodeIds that should be visible at startup.
-            if (extInfo.startingNodes && extInfo.startingNodes.length > 0) {
-                // Proceed to add those maps for the future too
-                let nodesToAdd = extInfo.map(item => {
-                    return { nodeId: item, extensionId: extInfo.extensionId };
-                });
-                knex("ln_Starting_Comp")
-                    .insert(nodesToAdd)
-                    .then(() => {
-                        // Add link to this user.
-                        knex("user_Extension")
-                            .insert({
-                                extensionId: extInfo.extensionId,
-                                userId: req.user.userId
-                            })
+            knex("user_Extension")
+                .insert({
+                    extensionId: extInfo.extensionId,
+                    userId: req.user.userId
+                })
+                .then(() => {
+                    // Check for a list of NodeIds that should be visible at startup.
+                    if (extInfo.startingNodes && extInfo.startingNodes.length > 0) {
+                        // Proceed to add those maps for the future too
+                        let nodesToAdd = extInfo.map(item => {
+                            return { nodeId: item, extensionId: extInfo.extensionId };
+                        });
+                        knex("ln_Starting_Comp")
+                            .insert(nodesToAdd)
                             .then(() => {
-                                res.json(extInfo);
-                            });
-                    })
-            }
+                                // Add link to this user.
+
+                            })
+                    } else {
+                        res.json(extInfo);
+                    }
+                });
         });
 });
 

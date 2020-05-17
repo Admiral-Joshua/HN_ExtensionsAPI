@@ -1,6 +1,26 @@
 const router = require("express").Router();
 
 // GET
+// '/list/all'
+// Retrieves a list of all files in the current extension.
+router.get('/list/all', (req, res) => {
+    let knex = req.app.get('db');
+
+    let extensionId = parseInt(req.cookies.extId);
+
+    if (!isNaN(extensionId)) {
+        knex("hn_CompFile")
+            .where({ extensionId: extensionId })
+            .then(files => {
+                res.json(files);
+            })
+    } else {
+        res.status(400);
+        res.send("Extension ID not specified or invalid.");
+    }
+})
+
+// GET
 // '/list/:id'
 // Retrives a list of all files defined for the given computer.
 router.get('/list/:id', (req, res) => {

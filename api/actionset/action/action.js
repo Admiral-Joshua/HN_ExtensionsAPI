@@ -18,18 +18,44 @@ router.get('/types/list', (req, res) => {
 router.get('/list/:id', (req, res) => {
     let knex = req.app.get('db');
 
-    let actionSetId = parseInt(req.cookies.id);
+    let actionSetId = parseInt(req.params.id);
 
     if (!isNaN(actionSetId)) {
         knex("LN_action_set")
             .where({ actionSetId: actionSetId })
-            .join('hn_Action', { 'hn_Action.actionId': 'ln_action_set.actionId' })
+            .join('hn_Action', { 'hn_Action.actionId': 'LN_action_set.actionId' })
             .then(actions => {
                 res.json(actions);
             });
     } else {
         res.status(400);
         res.send("Action Set ID not specified or invalid.");
+    }
+});
+
+// GET
+// '/:id'
+// Fetches an action that matches the given ActionId
+router.get('/:id', (req, res) => {
+    let knex = req.app.get('db');
+
+    let actionId = parseInt(req.params.id);
+
+    if (!isNaN(actionId)) {
+        knex("hn_Action")
+            .where({ actionId: actionId })
+            .first()
+            .then(actionInfo => {
+                if (actionInfo) {
+                    res.json(actionInfo);
+                } else {
+                    res.status(404);
+                    res.send("Action matching that ID could not be found.");
+                }
+            })
+    } else {
+        res.status(400);
+        res.send("Action ID not specified or invalid.");
     }
 });
 
@@ -54,7 +80,9 @@ router.post('/new', (req, res) => {
             Delay: actionInfo.Delay > 0 ? actionInfo.Delay : undefined,
             targetCompId: actionInfo.targetCompId > 0 ? actionInfo.targetCompId : undefined,
             functionId: actionInfo.functionId > 0 ? actionInfo.functionId : undefined,
-            functionValue: actionInfo.functionValue > 0 ? actionInfo.functionValue : undefined
+            functionValue: actionInfo.functionValue > 0 ? actionInfo.functionValue : undefined,
+            conditionId: actionInfo.conditionId > 0 ? actionInfo.conditionId : undefined,
+            typeId: actionInfo.typeId
         })
         .returning("actionId")
         .then(ids => {
@@ -82,7 +110,6 @@ router.put('/:id', (req, res) => {
     if (!isNaN(actionId)) {
         knex("hn_Action")
             .update({
-                actionId: actionInfo.actionId,
                 // requirementId: actionInfo.requirementId,
                 loadActionSetId: actionInfo.loadActionSetId,
                 loadMissionId: actionInfo.loadMissionId,
@@ -93,7 +120,8 @@ router.put('/:id', (req, res) => {
                 Delay: actionInfo.Delay,
                 targetCompId: actionInfo.targetCompId,
                 functionId: actionInfo.functionId,
-                functionValue: actionInfo.functionValue
+                functionValue: actionInfo.functionValue,
+                conditionId: actionInfo.conditionId
             })
             .where({ actionId: actionId })
             .then(() => {
@@ -114,16 +142,11 @@ router.delete('/:id', (req, res) => {
     let actionId = parseInt(req.params.id);
 
     if (!isNaN(actionId)) {
-        knex("LN_action_set")
+        knex("hn_Action")
             .where({ actionId: actionId })
             .del()
             .then(() => {
-                knex("hn_Action")
-                    .where({ actionId: actionId })
-                    .del()
-                    .then(() => {
-                        res.sendStatus(204);
-                    });
+                res.sendStatus(204);
             });
     } else {
         res.status(400);

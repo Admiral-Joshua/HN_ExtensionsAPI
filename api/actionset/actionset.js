@@ -2,18 +2,19 @@ const router = require("express").Router();
 
 router.use('/action', require("./action/action"));
 
+router.use('/condition', require("./action/condition"));
+
 // GET
 // '/list'
 // Retrieves a summary of action sets for the current extension
-router.get('/summary', (req, res) => {
+/*router.get('/summary', (req, res) => {
     let knex = req.app.get('db');
 
     let currentExtension = parseInt(req.cookies.extId);
 
     knex("hn_ActionSet")
-        .select('hn_ActionSet.actionSetId', 'hn_ActionSet.name', knex.raw('COUNT("hn_Action"."actionId") as count'))
-        .join("LN_action_set", { "LN_action_set.actionSetId": "hn_ActionSet.actionSetId" })
-        .join("hn_Action", { "hn_Action.actionId": "LN_action_set.actionId" })
+        .select('hn_ActionSet.actionSetId', 'hn_ActionSet.name', knex.raw('COUNT("LN_action_set"."actionId") as count'))
+        .leftJoin("LN_action_set", { "LN_action_set.actionSetId": "hn_ActionSet.actionSetId" })
         .where({
             'hn_ActionSet.extensionId': currentExtension
         })
@@ -22,7 +23,22 @@ router.get('/summary', (req, res) => {
             res.json(rows);
         })
 
-});
+});*/
+
+// GET
+// '/list'
+// Retrieves list of action sets defined in the current extension
+router.get('/list', (req, res) => {
+    let knex = req.app.get('db');
+
+    let currentExtension = req.cookies.extId;
+
+    knex("hn_ActionSet")
+        .where({ extensionId: currentExtension })
+        .then(actionsets => {
+            res.json(actionsets);
+        })
+})
 
 // GET
 // '/:id'
@@ -41,18 +57,43 @@ router.get('/:id', (req, res) => {
             .where({ actionSetId: actionSetId })
             .first()
             .then(actionSetInfo => {
-                // Query for actions..
-
-                knex("LN_action_set")
-                    .select('hn_Action.*')
+                // Query for conditions and their subsequent actions
+                knex("hn_ActionCondition")
                     .where({ actionSetId: actionSetId })
-                    .join('hn_Action', { 'LN_action_set.actionId': 'hn_Action.actionId' })
-                    .then(actions => {
-                        actionSetInfo.actions = actions;
+                    .join("hn_ConditionType", { 'hn_ConditionType.typeId': "hn_ActionCondition.typeId" })
+                    .then(conditions => {
 
-                        res.json(actionSetInfo);
+                        if (conditions.length > 0) {
+                            let conditionIds = [];
+
+                            conditions.forEach(condition => {
+                                conditionIds.push(condition.conditionId);
+
+                                condition.actions = [];
+                            });
+
+                            knex("hn_Action")
+                                .whereIn('conditionId', conditionIds)
+                                .leftJoin('hn_ActionType', { 'hn_ActionType.typeId': 'hn_Action.typeId' })
+                                .then(actions => {
+                                    actions.forEach(action => {
+                                        let idx = conditions.findIndex(condition => condition.conditionId === action.conditionId);
+                                        if (idx > -1) {
+                                            conditions[idx].actions.push(action);
+                                        }
+                                    });
+
+                                    actionSetInfo.conditions = conditions;
+
+                                    res.json(actionSetInfo);
+                                })
+
+                        } else {
+                            actionSetInfo.conditions = conditions;
+
+                            res.json(actionSetInfo);
+                        }
                     })
-
             });
     } else {
         res.status(400);
@@ -81,15 +122,33 @@ router.post('/new', (req, res) => {
             if (ids.length > 0) {
                 actionSetInfo.actionSetId = ids[0];
 
-                // Create links to actions
-                let links = actions.map(action => {
-                    return { actionId: action.actionId, actionSetId: ids[0] };
-                });
-                knex("LN_action_set")
-                    .insert(links)
-                    .then(() => {
-                        res.json(actionSetInfo);
+                knex("hn_ConditionType")
+                    .where({ typeText: 'Instantly' })
+                    .first()
+                    .then(type => {
+                        // Create Instantly default condition for this action set.
+                        knex("hn_ActionCondition")
+                            .insert({
+                                typeId: type.typeId,
+                                needsMissionComplete: false,
+                                actionSetId: actionSetInfo.actionSetId
+                            })
+                            .returning("conditionId")
+                            .then(ids => {
+                                if (ids.length > 0) {
+                                    actionSetInfo.conditions.push({
+                                        conditionId: ids[0],
+                                        typeId: type.typeId,
+                                        typeText: "Instantly",
+                                        actionSetId: actionSetInfo.actionSetId
+                                    })
+
+                                    res.json(actionSetInfo);
+                                }
+                            })
                     })
+
+
             } else {
                 res.sendStatus(500);
             }
@@ -105,43 +164,33 @@ router.put('/:id', (req, res) => {
     let actionSetId = parseInt(req.params.id);
 
     let actionSetInfo = req.body;
-    let actions = req.body.actions;
 
     if (!isNaN(actionSetId)) {
-        knex("hn_ActionSet")
-            .update({
-                name: actionSetInfo
-            })
-            .where({
-                actionSetId: actionSetId
-            })
-            .then(() => {
 
-                // Clear all links to existing Actions
-                knex("LN_action_set")
-                    .where({
-                        actionSetId: actionSetId
+        knex.transaction(trx => {
+            const queries = actionSetInfo.conditions.map(condition => {
+                return knex('hn_ActionCondition')
+                    .where({ conditionId: condition.conditionId })
+                    .update({
+                        needsMissionComplete: condition.needsMissionComplete,
+                        requiredFlags: condition.requiredFlags,
+                        targetNodeId: condition.targetNodeId
                     })
-                    .del()
-                    .then(() => {
+                    .transacting(trx);
+            });
 
-                        // Recreate links for what is left.
-                        let reqLinks = actions.map(action => {
-                            return { actionSetId: actionSetId, actionId: action.actionId }
-                        });
-
-                        knex("LN_action_set")
-                            .insert(reqLinks)
-                            .then(() => {
-                                res.json(actionSetInfo);
-                            })
-                    })
-            })
+            Promise.all(queries)
+                .then(() => {
+                    trx.commit();
+                    res.json(actionSetInfo);
+                })
+                .catch(trx.rollback);
+        });
     } else {
         res.status(400);
         res.send("Action Set ID not specified or invalid.");
     }
-})
+});
 
 // DELETE
 // '/:id'
@@ -156,29 +205,31 @@ router.delete('/:id', (req, res) => {
 
     if (!isNaN(actionSetId)) {
 
-        // Delete all requirements that this action set contained.
-        knex("LN_action_reqs")
-            .select("requirementId")
+        // Get a list of all conditions for this action set
+        knex("hn_ActionCondition")
             .where({ actionSetId: actionSetId })
-            .then(ids => {
-                knex("hn_ActionRequirement")
-                    .whereIn({ requirementId: ids })
-                    .del(() => {
+            .then(conditions => {
+                let ids = conditions.map(condition => condition.conditionId);
 
-                        // Delete all links to this action set
-                        knex("LN_action_set")
+                knex("hn_Action")
+                    .whereIn("conditionId", ids)
+                    .del()
+                    .then(() => {
+                        knex("hn_ActionCondition")
                             .where({ actionSetId: actionSetId })
                             .del()
                             .then(() => {
+                                // Finally - delete action set
                                 knex("hn_ActionSet")
                                     .where({ actionSetId: actionSetId })
-                                    .del(() => {
+                                    .del()
+                                    .then(() => {
                                         res.sendStatus(204);
-                                    });
-                            });
-                    });
+                                    })
+                            })
+                    })
             })
-            .del();
+
     } else {
         res.status(400);
         res.send("Action Set ID not specified or invalid.");
