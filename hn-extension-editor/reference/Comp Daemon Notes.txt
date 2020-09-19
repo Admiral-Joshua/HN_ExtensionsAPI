@@ -1,0 +1,289 @@
+Hacknet Extensions
+Computers
+Daemons
+
+-------------------------------
+--- mailServer
+Fields:
+ - name
+ - color
+ - generateJunk
+ - emails already on it
+ 
+Email:
+	- recipient
+	- sender
+	- subject
+	- content
+	
+--------------------------------
+--------------------------------
+
+--- uploadServerDaemon
+Fields:
+ - name
+ - folder
+ - needsAuth (boolean)
+ - color
+ 
+--------------------------------
+--------------------------------
+
+-- addWebServer
+Fields:
+ - name
+ - url
+ 
+--------------------------------
+--------------------------------
+
+--- deathRowDatabase
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+
+--- academicDatabase
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+ 
+--- ispSystem
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+
+--- messageBoard
+Fields:
+ - name
+ - contents (threads)
+ 
+Thread:
+ URL (path to string set)
+ 
+--------------------------------
+--------------------------------
+
+--- MedicalDatabase
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+
+--- HeartMonitor
+Fields:
+ - patient
+ 
+--------------------------------
+--------------------------------
+
+--- PointClicker
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+
+--- SongChangerDaemon
+Fields:
+ none
+
+--------------------------------
+--------------------------------
+
+--- variableMissionListingServer
+Fields:
+ - name
+ - iconPath
+ - articleFolderPath
+ - color
+ - assigner
+ - public
+ - title
+ 
+--------------------------------
+--------------------------------
+
+--- missionHubServer
+Fields:
+ - groupName
+ - serviceName
+ - missionFolderPath
+ - themeColor
+ - lineColor
+ - backgroundColor
+ - allowAbandon
+ 
+--------------------------------
+--------------------------------
+
+--- CreditsDaemon
+Fields:
+ - Title
+ - ButtonText
+ - ConditionalActionSetToRunOnButtonPressPath
+ 
+--------------------------------
+--------------------------------
+
+--- memoryDumpFile
+Fields:
+ - name
+ - path
+ - memory (Memory Object)
+
+Memory Object:
+ - Data: Block[]
+	- Block (string)
+ - Commands: Command[]
+    - Command :(string)
+ - Images (Image)
+	- Image: Path to image (string)
+	
+--------------------------------
+--------------------------------
+
+--- CustonConnectDisplayDaemon
+Fields:
+ none
+ 
+--------------------------------
+--------------------------------
+
+--- LogoDaemon
+Fields:
+ - name
+ - ShowsTitle
+ - TextColor 
+ - LogoImagePath
+ 
+--------------------------------
+--------------------------------
+
+--- LogoCustomConnectDisplayDaemon
+Fields:
+ - logo
+ - title
+ - overdrawLogo
+ - buttonAlignment
+ 
+--------------------------------
+--------------------------------
+
+--- WhitelistAuthenticatorDaemon
+Fields:
+ - SelfAuthentication
+ - Remote
+ 
+--------------------------------
+--------------------------------
+
+--- MarkovTextDaemon
+Fields:
+ - Name
+ - SourceFilesContentFolder
+ 
+--------------------------------
+--------------------------------
+
+--- IRCDaemon
+Fields:
+ - themeColor
+ - name
+ - needsLogin
+ 
+Users: (class)
+ - name
+ - color
+ 
+Posts: (class)
+ - user
+ - content
+ 
+--------------------------------
+--------------------------------
+
+--- DHSDaemon
+Fields:
+ - groupName
+ - addsFactionPointOnMissionComplete
+ - autoClearMissionsOnPlayerComplete
+ - themeColor
+ - allowContractAbbandon
+ 
+Agent: (class)
+ - name
+ - pass
+ - color
+
+--------------------------------
+--------------------------------
+
+--- DatabaseDaemon
+Fields:
+ - Permissions
+ - DataType
+ - Foldername
+ - Color
+ - AdminEmailAccount
+ - AdminEmailHostID
+ - Name
+ 
+Contents: (Variable)
+ 
+ GitCommitEntry:
+	- EntryNumber
+	- ChangedFiles (String[])
+	- Message
+	- UserName
+	- SourceIP
+	
+ TextRecord
+   <TextRecord>
+     <Title>Record Title</Title>
+     <Data>Body Data</Data>
+   </TextRecord>
+   
+ OnlineAccount
+   <OnlineAccount>
+     <ID>1234</ID>
+     <Username>asdf</Username>
+     <BanStatus>very yes</BanStatus>
+     <Notes>notes here</Notes>
+   </OnlineAccount>
+   
+  "CAROData"
+   UserID
+   Headshots
+   Kills
+   Rank
+   Crowbars
+   InventoryID
+   BanStatus
+   
+  "Account"
+   string ID;
+   string Cash;
+   string Bank;
+   string Apartments;
+   string Vehicles;
+   string PegasusVehicles;
+   string Rank;
+   string RP;
+   string Kills;
+   
+   "SurveillanceProfile"
+   string Name;
+   string Age;
+   string HomeCity;
+   string Notes;
+   string CriminalRecord;
+   
+--------------------------------
+--------------------------------

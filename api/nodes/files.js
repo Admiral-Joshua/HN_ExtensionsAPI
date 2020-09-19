@@ -21,6 +21,18 @@ router.get('/list/all', (req, res) => {
 })
 
 // GET
+// '/templates/list'
+// Retrieve a list of possible file templates available for file creation,
+router.get('/templates/list', (req, res) => {
+    let knex = req.app.get('db');
+
+    knex("hn_FileTemplate")
+        .then(templates => {
+            res.json(templates);
+        })
+})
+
+// GET
 // '/list/:id'
 // Retrives a list of all files defined for the given computer.
 router.get('/list/:id', (req, res) => {
@@ -191,16 +203,22 @@ router.delete('/:id', (req, res) => {
 
     if (currentExtension && fileId && !isNaN(fileId)) {
 
-        // Start by deleting all links to this file...
+        // Delete any computers that might hold this file.
         knex("ln_Comp_File")
             .where({ fileId: fileId })
             .del()
             .then(() => {
-                knex("hn_CompFile")
-                    .where({ fileId: fileId, extensionId: currentExtension })
+                // Delete any actions that might reference this file.
+                knex("hn_Action")
+                    .where({ fileId: fileId })
                     .del()
                     .then(() => {
-                        res.sendStatus(204);
+                        knex("hn_CompFile")
+                            .where({ fileId: fileId, extensionId: currentExtension })
+                            .del()
+                            .then(() => {
+                                res.sendStatus(204);
+                            });
                     });
             });
     } else {

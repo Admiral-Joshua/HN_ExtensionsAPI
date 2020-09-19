@@ -1,0 +1,32 @@
+Conditional Action Set
+Notes on Implementation
+----------------------------
+
+Possible Conditions:
+
+ - Instantly
+  - needsMissionComplete (OPTIONAL) default false
+  
+ - OnConnect
+   - target (nodeId)
+   - needsMissionComplete
+   - requiredFlags
+   
+ - HasFlags
+   - requiredFlags
+   
+ - OnAdminGained
+   - target (nodeId)
+   
+ - DoesNotHaveFlags
+   - Flags
+   
+ - OnDisconnect
+  - target (nodeId)
+  
+  
+--- FOR FACTIONS
+ - Action
+   - ValueRequired (number - rank) OPTIONAL
+   - Flags (csv - flags) OPTIONAL
+   

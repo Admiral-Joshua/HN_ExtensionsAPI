@@ -1,3 +1,4 @@
+const validator = require("../auth_validate/validate");
 const router = require("express").Router();
 
 
@@ -29,7 +30,11 @@ router.get('/list', (req, res) => {
                         comps.get(node.nodeId).ports.push(node.portType);
                     } else {
                         let comp = node;
-                        comp.ports = [node.portType];
+                        comp.ports = [];
+
+                        if (node.portType) {
+                            comp.ports.push(node.portType);
+                        }
 
                         comps.set(node.nodeId, comp);
                     }
@@ -56,9 +61,9 @@ router.get('/:id', (req, res) => {
 
     if (nodeId && !isNaN(nodeId)) {
         knex("hn_CompNode")
-            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', 'typeId', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker')
+            .select('hn_CompNode.nodeId', 'id', 'name', 'ip', 'securityLevel', 'typeId', knex.raw('COALESCE("allowsDefaultBootModule", false) as "allowsDefaultBootModule"'), 'icon', 'adminPass', 'portsForCrack', 'traceTime', 'adminInfoId', 'tracker', 'proxyTime', 'fwall_Level', 'fwall_solution', 'fwall_additional')
 
-        .where({ 'nodeId': nodeId })
+            .where({ 'nodeId': nodeId })
             .first()
             .then(nodeInfo => {
 
@@ -127,7 +132,12 @@ router.post('/new', (req, res) => {
                         portsForCrack: nodeInfo.portsForCrack,
                         traceTime: nodeInfo.traceTime,
                         adminInfoId: nodeInfo.adminInfoId,
-                        tracker: nodeInfo.tracker
+                        tracker: nodeInfo.tracker,
+                        fwall_Level: nodeInfo.fwall_Level || -1,
+                        fwall_solution: nodeInfo.fwall_solution,
+                        fwall_additional: nodeInfo.fwall_additional,
+                        proxyTime: nodeInfo.proxyTime || -1,
+
                     })
                     .returning("nodeId")
                     .then(ids => {
@@ -192,7 +202,11 @@ router.put('/:id', (req, res) => {
                 portsForCrack: nodeInfo.portsForCrack,
                 traceTime: nodeInfo.traceTime,
                 adminInfoId: nodeInfo.adminInfoId,
-                tracker: nodeInfo.tracker
+                tracker: nodeInfo.tracker,
+                fwall_Level: nodeInfo.fwall_Level || -1,
+                fwall_solution: nodeInfo.fwall_solution,
+                fwall_additional: nodeInfo.fwall_additional,
+                proxyTime: nodeInfo.proxyTime || -1,
             })
             .where({ nodeId: nodeId })
             .then(() => {
@@ -203,5 +217,50 @@ router.put('/:id', (req, res) => {
         res.send("Node ID was not specified or was invalid.")
     }
 });
+
+// DELETE
+// '/:id'
+// Deletes a node and all associated data.
+router.delete('/:id', validator(), (req, res) => {
+    let knex = req.app.get('db');
+
+    let nodeId = parseInt(req.params.id);
+
+    if (!isNaN(nodeId)) {
+        // Start by identifying any links to files that need deleting...
+        knex("ln_Comp_File")
+            .where({ nodeId: nodeId })
+            .then(files => {
+
+                var fileIds = files.map(file => file.fileId);
+
+                // Delete links
+                knex("ln_Comp_File")
+                    .whereIn("fileId", fileIds)
+                    .del()
+                    .then(() => {
+                        // Delete the files
+                        knex("hn_CompFile")
+                            .whereIn("fileId", fileIds)
+                            .del()
+                            .then(() => {
+                                // Delete port links
+                                knex("ln_Comp_Ports")
+                                    .where({ nodeId: nodeId })
+                                    .del()
+                                    .then(() => {
+                                        // Finally, delete the computer
+                                        knex("hn_CompNode")
+                                            .where({ nodeId: nodeId })
+                                            .del()
+                                            .then(() => {
+                                                res.sendStatus(204);
+                                            });
+                                    });
+                            });
+                    });
+            });
+    }
+})
 
 module.exports = router;

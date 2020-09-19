@@ -319,6 +319,7 @@ ALTER TABLE "hn_Action" ADD FOREIGN KEY ("ircMessageId") REFERENCES "hn_ircMessa
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("delayCompId") REFERENCES "hn_CompNode" ("nodeId");
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("targetCompId") REFERENCES "hn_CompNode" ("nodeId");
 ALTER TABLE "hn_Action" ADD FOREIGN KEY ("functionId") REFERENCES "hn_Function" ("functionId");
+ALTER TABLE "hn_Action" ADD FOREIGN KEY ("conditionId") REFERENCES "hn_ActionCondition" ("conditionId");
 
 ALTER TABLE "hn_ActionSet" ADD FOREIGN KEY ("extensionId") REFERENCES "extension_Info" ("extensionId");
 

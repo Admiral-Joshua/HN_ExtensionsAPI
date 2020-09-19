@@ -70,7 +70,11 @@ INSERT INTO "hn_Ports" ("portId", "port", "portType") VALUES
 (7, 6881, 'BITTORRENT'),
 (8, 443, 'SSL'),
 (9, 192, 'PACIFIC'),
-(10, 554, 'RTSP') ON CONFLICT ("portId") DO NOTHING;
+(10, 554, 'RTSP'),
+(11, 9418, 'VERSION CONTROL'),
+(12, 3724, 'BLIZZARD UPDATER'),
+(13, 3659, 'eOS CONNECTION MANAGER')
+ON CONFLICT ("portId") DO NOTHING;
 
 -- hn_CompType
 -- List of Computer defaults for Hacknet, useful for starting templates
@@ -166,3 +170,49 @@ ON CONFLICT("typeId") DO NOTHING;
 -- Defines all layouts currently supported for themes in HACKNET
 INSERT INTO "hn_ThemeLayout" ("LayoutName") VALUES
 ('blue'), ('green'), ('white'), ('mint'), ('greencompact'), ('riptide'), ('colamaeleon'), ('riptide2');
+
+INSERT INTO "hn_FileTemplate" ("path", "name", "contents") VALUES
+('bin', 'SSHCrack.exe', '#SSH_CRACK#'),
+('bin', 'FTPBounce.exe', '#FTP_CRACK#'),
+('bin', 'WebServerWorm.exe', '#WEB_CRACK#'),
+('bin', 'SMTPOverflow.exe', '#SMTP_CRACK#'),
+('bin', 'SQLBufferOverflow.exe', '#SQL_CRACK#'),
+('bin', 'HexClock.exe', '#HEXCLOCK_EXE#'),
+('bin', 'Clock.exe', '#CLOCK_PROGRAM#'),
+('bin', 'Decypher.exe', '#DECYPHER_PROGRAM#'),
+('bin', 'DECHead.exe', '#DECHEAD_PROGRAM#'),
+('bin', 'KBTPortTest.exe', '#MEDICAL_PROGRAM#'),
+('bin', 'ThemeChanger.exe', '#THEMECHANGER_EXE#'),
+('bin', 'eosDeviceScan.exe', '#EOS_SCANNER_EXE#'),
+('bin', 'SecurityTracer.exe', '#SECURITYTRACER_PROGRAM#'),
+('bin', 'TorrentStreamInjector.exe', '#TORRENT_EXE#'),
+('bin', 'SSLTrojan.exe', '#SSL_EXE#'),
+('bin', 'FTPSprint.exe', '#FTP_FAST_EXE#'),
+('bin', 'SignalScramble.exe', '#SIGNAL_SCRAMBLER_EXE#'),
+('bin', 'MemForensics.exe', '#MEM_FORENSICS_EXE#'),
+('bin', 'MemDumpGenerator.exe', '#MEM_DUMP_GENERATOR#'),
+('bin', 'PacificPortcrusher.exe', '#PACIFIC_EXE#'),
+('bin', 'NetmapOrganizer.exe', '#NETMAP_ORGANIZER_EXE#'),
+('bin', 'ComShell.exe', '#SHELL_CONTROLLER_EXE#'),
+('bin', 'DNotes.exe', '#NOTES_DUMPER_EXE#'),
+('bin', 'Tuneswap.exe', '#DLC_MUSIC_EXE#'),
+('bin', 'Clockv2.exe', '#CLOCK_V2_EXE#'),
+('sys', 'White-Theme.sys', '#WHITE_THEME#'),
+('sys', 'Green-Theme.sys', '#GREEN_THEME#'),
+('sys', 'Yellow-Theme.sys', '#YELLOW_THEME#'),
+('sys', 'Teal-Theme.sys', '#TEAL_THEME#'),
+('sys', 'Base-Theme.sys', '#BASE_THEME#'),
+('sys', 'Purple-Theme.sys', '#PURPLE_THEME#'),
+('sys', 'Mint-Theme.sys', '#MINT_THEME#'),
+('sys', 'CreditsData.txt', '%---  Credits File  ---
+ 
+^Why this exists
+This file contains the credits for the credits daemon below!
+ 
+%Starting a line with % makes the text super big
+^And starting it with ^ makes is kind of big.
+Lines starting with anything else are normal
+ 
+^Location
+This file must be in home/CreditsData.txt
+for the credits daemon to find and use it.');
