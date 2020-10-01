@@ -13,7 +13,8 @@ router.use('/auth', require("./auth/auth"));
 // Authorization - Don't let non-authenticated users work on extensions.
 router.use(jwt({
     secret: secret,
-    strict: false
+    strict: false,
+    algorithms: ['HS256']
 }));
 
 
