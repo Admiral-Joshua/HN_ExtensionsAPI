@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 
 var whitelist = ['http://dev.lunasphere.co.uk', 'http://dev.lunasphere.co.uk:4200']
 var corsOptions = {
-    origin: 'http://dev.lunasphere.co.uk:4200',
+    origin: ['http://dev.lunasphere.co.uk:4200'],
     credentials: true,
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
@@ -45,14 +45,18 @@ app.use(express.static(`${__dirname}/app`));
 // Allow some CORS
 //app.options('*', cors()) // include before other routes
 app.use(cors(corsOptions));
+if (process.env.DEVELOPMENT) {
+    console.log("CAUTION! Development mode active - Allowing CORS...");
+    app.options('*', cors());
+}
 
 // Push SQL-Builder to app so it can be utilised throughout the project.
 app.set('db', db);
 app.set('path', `${__dirname}`);
 
 // Parse POST body data.6
-//app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Parse Cookie Data from the client
 app.use(cookieParser());
