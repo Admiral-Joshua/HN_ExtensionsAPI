@@ -1,4 +1,6 @@
+const path = require("path");
 const router = require("express").Router();
+const fs = require("fs");
 
 // Layouts API
 router.use('/layouts', require("./layout/layout"));
@@ -50,6 +52,65 @@ router.get('/:id', (req, res) => {
         res.status(400);
         res.send("Theme ID not specified or is invalid.");
     }
+});
+
+// POST
+// '/upload'
+// Uploads a new background image for the specified theme
+router.post('/upload', (req, res) => {
+    let user = req.user;
+    let root = req.app.get('path');
+    let themeInfo = req.body;
+    let themeImage = req.files.bgimage;
+
+    // Check if user directory exists.
+    //var PATH = `${root}\\user_data\\${user.userId}`;
+    var PATH = path.join(root, 'user_data', user.userId.toString());
+    if (!fs.existsSync(PATH)) {
+        fs.mkdirSync(PATH);
+    }
+
+    // Check if extension directory exists.
+    PATH = path.join(PATH, themeInfo.extensionId.toString(), 'Themes');
+    if (!fs.existsSync(PATH)) {
+        fs.mkdirSync(PATH, { recursive: true });
+    }
+
+    let fileExt = /\.(?:[a-z]|[0-9]){1,3}$/.exec(themeImage.name);
+    // Proceed to move the uploaded audio file into the user's directory.
+    let dest = path.join(PATH, themeInfo.themeId.toString() + fileExt);
+    themeImage.mv(dest, (err) => {
+        if (err) { res.sendStatus(500); return; }
+        res.sendStatus(204);
+    });
+});
+
+// GET
+// '/:themeId/bgimage'
+// Retrieves background image for the requested theme (if available)
+router.get('/:themeId/bgimage', (req, res) => {
+    let knex = req.app.get('db');
+    let user = req.user;
+    let themeId = req.params.themeId;
+    let root = req.app.get('path');
+
+    knex("hn_Theme")
+        .where({ themeId: themeId })
+        .first()
+        .then((theme) => {
+            if (theme) {
+                var PATH = path.join(root, 'user_data', user.userId.toString(), theme.extensionId.toString(), 'Themes', theme.themeId.toString() + ".png");
+
+                if (fs.existsSync(PATH)) {
+                    res.sendFile(PATH);
+                } else {
+                    //res.sendStatus(404);
+                    res.sendFile(path.join(root, 'user_data', '0', 'Themes', 'hacknet_dlc_purple.png'));
+                }
+            } else {
+                res.sendFile(path.join(root, 'user_data', '0', 'Themes', 'hacknet_dlc_purple.png'));
+            }
+        });
 });
 
 // POST

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const fs = require("fs");
+const { join } = require("path");
 
 // GET 
 // '/list'
@@ -32,7 +33,7 @@ router.get('/play/:id', (req, res) => {
         // Verify user owns this track
         knex("hn_Music")
             .where({ musicId: trackId })
-            .andWhere(function() {
+            .andWhere(function () {
                 this.orWhere({ ownerId: user.userId })
                     .orWhere({ ownerId: 0 })
             })
@@ -99,14 +100,14 @@ router.post('/new', (req, res) => {
     // TODO: Validate Track Info.
 
     // Check if user directory exists.
-    var PATH = `${root}/user_data/${user.userId}`;
+    //var PATH = `${root}/user_data/${user.userId}`;
+    var PATH = join(root, 'user_data', user.userId.toString())
     if (!fs.existsSync(PATH)) {
         fs.mkdirSync(PATH);
     }
 
     // GET FILE EXTENSION
     let fileExt = /\.(?:[a-z]|[0-9]){1,3}$/.exec(trackFile.name);
-
 
     knex("hn_Music")
         .insert({ ownerId: user.userId, title: trackInfo.title })
@@ -116,7 +117,8 @@ router.post('/new', (req, res) => {
                 trackInfo.musicId = ids[0];
 
                 // Proceed to move the uploaded audio file into the user's directory.
-                trackFile.mv(`${PATH}/${trackInfo.musicId}${fileExt}`, (err) => {
+                let dest = join(PATH, trackInfo.musicId.toString() + fileExt);
+                trackFile.mv(dest, (err) => {
                     if (err) { res.sendStatus(500); return; }
                     res.json(trackInfo);
                 });
@@ -180,6 +182,12 @@ router.delete('/:id', (req, res) => {
             .where({ ownerId: user.userId, musicId: trackId })
             .del()
             .then(() => {
+
+                let filePath = join(req.app.get('path'), 'user_data', user.userId.toString(), trackId.toString() + ".ogg");
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+
                 res.sendStatus(204); //success - empty response.
             });
     } else {
