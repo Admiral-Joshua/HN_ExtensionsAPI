@@ -243,3 +243,28 @@ FOR EACH ROW EXECUTE PROCEDURE actionsetupdated();
 
 CREATE TRIGGER actionset_deleted AFTER DELETE ON "hn_ActionSet"
 FOR EACH ROW EXECUTE PROCEDURE actionsetdeleted();
+
+CREATE TABLE IF NOT EXISTS "build_job_status" (
+    "job_status_id" SERIAL PRIMARY KEY,
+    "status_name" TEXT
+);
+
+INSERT INTO "build_job_status" VALUES 
+(1, 'Queued'),
+(2, 'Running'),
+(3, 'Completed'),
+(4, 'Cancelled');
+
+CREATE TABLE IF NOT EXISTS "build_job" (
+    "job_id" SERIAL PRIMARY KEY,
+    "job_status" int,
+    "time_submitted" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" int NOT NULL,
+    "extension_id" int NOT NULL,
+    "rebuild" boolean NOT NULL DEFAULT FALSE,
+    "time_started" TIMESTAMP,
+    "time_completed" TIMESTAMP
+);
+
+/*CREATE TRIGGER actionset_deleted AFTER DELETE ON "change_log"
+FOR EACH ROW EXECUTE PROCEDURE buildjob();*/

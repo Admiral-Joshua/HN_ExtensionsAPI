@@ -61,4 +61,9 @@ router.use('/missions', secValidator(), require("./missions/missions"));
 // ActionSet API
 // Management and editing of ActionSets for an extension.
 router.use('/actionset', secValidator(), require("./actionset/actionset"));
+
+// Builder API
+// Creation and view of BuilderJobs for the current user
+router.use('/build', require('./build/build'));
+
 module.exports = router;
