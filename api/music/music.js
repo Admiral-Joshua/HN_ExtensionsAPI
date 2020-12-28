@@ -1,22 +1,85 @@
 const router = require("express").Router();
 const fs = require("fs");
-const { join } = require("path");
+const {join} = require("path");
 
 // GET 
-// '/list'
-// Fetches a list of music tracks available for the currently logged in user.
-router.get('/list', (req, res) => {
+// '/list/(default?|custom?)'
+// Fetches a list of music tracks available.
+// Path Options:
+//      Default - Tracks available within the Hacknet game itself.
+//      Custom - Tracks you've uploaded to your account.
+router.get('/list/:type', (req, res) => {
     let knex = req.app.get('db');
     let user = req.user;
 
-    knex("hn_Music")
-        .where({ ownerId: 0 })
-        .orWhere({ ownerId: user.userId })
-        .orderBy('musicId', 'desc')
-        .then(rows => {
-            res.json(rows);
+    let ok = false;
+
+    let query = knex("hn_Music").select("hn_Music.*").orderBy("hn_Music.musicId", "desc");
+
+    if (req.params.type === 'custom') {
+        query.where({ownerId: user.userId}), ok = true;
+    } else if (req.params.type === 'default') {
+        query.where({ownerId: 0}), ok = true;
+    } else if (req.params.type === 'all') {
+        query.whereIn('ownerId', [user.userId, 0]), ok = true;
+    } else if (req.params.type === 'extension') {
+        let currentExtension = parseInt(req.cookies.extId);
+        if (!isNaN(currentExtension)) {
+            query.innerJoin("LN_extension_music", {"LN_extension_music.musicId": "hn_Music.musicId"})
+                .where({'extensionId': currentExtension}), ok = true;
+        }
+    } else {
+        res.status(400).send(`unrecognized list type ${req.params.type}\nSelect one from (default, custom, all)`);
+    }
+
+    if (ok)
+        query.then((music) => {
+            res.json(music);
         });
 });
+
+// Routes for /extension/trackId
+// Provides routes for marking a track to be included or no longer included in an extension when packaged.
+// PUT - Marks track for inclusion
+// DELETE - Marks track to no longer be included.
+router.route('/extension/:trackId')
+    .put((req, res) => {
+        let knex = req.app.get('db');
+        let musicId = parseInt(req.params.trackId);
+
+        let currentExtension = parseInt(req.cookies.extId);
+        if (!isNaN(currentExtension) && !isNaN(musicId)) {
+            knex("LN_extension_music")
+                .insert({
+                    musicId: req.params.trackId,
+                    extensionId: currentExtension
+                })
+                .then(() => {
+                    res.sendStatus(204);
+                })
+        } else {
+            res.status(400).send(`${isNaN(currentExtension) ? 'ExtensionID' : 'MusicID'} not specified, or is invalid.`);
+        }
+    })
+    .delete((req, res) => {
+        let knex = req.app.get('db');
+        let user = req.user;
+
+        let currentExtension = parseInt(req.cookies.extId);
+        if (!isNaN(currentExtension)) {
+            knex("LN_extension_music")
+                .where({
+                    musicId: req.params.trackId,
+                    extensionId: currentExtension
+                })
+                .del()
+                .then(() => {
+                    res.sendStatus(204);
+                })
+        } else {
+            res.status(400).send("Extension ID not specified, or is invalid.");
+        }
+    });
 
 // GET
 // '/play/:id;
@@ -32,10 +95,10 @@ router.get('/play/:id', (req, res) => {
 
         // Verify user owns this track
         knex("hn_Music")
-            .where({ musicId: trackId })
+            .where({musicId: trackId})
             .andWhere(function () {
-                this.orWhere({ ownerId: user.userId })
-                    .orWhere({ ownerId: 0 })
+                this.orWhere({ownerId: user.userId})
+                    .orWhere({ownerId: 0})
             })
             .first()
             .then(track => {
@@ -110,7 +173,7 @@ router.post('/new', (req, res) => {
     let fileExt = /\.(?:[a-z]|[0-9]){1,3}$/.exec(trackFile.name);
 
     knex("hn_Music")
-        .insert({ ownerId: user.userId, title: trackInfo.title })
+        .insert({ownerId: user.userId, title: trackInfo.title})
         .returning("musicId")
         .then(ids => {
             if (ids.length > 0) {
@@ -119,7 +182,10 @@ router.post('/new', (req, res) => {
                 // Proceed to move the uploaded audio file into the user's directory.
                 let dest = join(PATH, trackInfo.musicId.toString() + fileExt);
                 trackFile.mv(dest, (err) => {
-                    if (err) { res.sendStatus(500); return; }
+                    if (err) {
+                        res.sendStatus(500);
+                        return;
+                    }
                     res.json(trackInfo);
                 });
             } else {
@@ -142,15 +208,15 @@ router.put('/:id', (req, res) => {
 
         // Check music exists, (and you own it)
         knex("hn_Music")
-            .where({ ownerId: user.userId, musicId: req.params.id })
+            .where({ownerId: user.userId, musicId: req.params.id})
             .first()
             .then(row => {
                 // If track exists and you own it
                 if (row) {
                     // Proceed with the rename.
                     knex("hn_Music")
-                        .where({ ownerId: user.userId, musicId: req.params.id })
-                        .update({ title: trackInfo.title })
+                        .where({ownerId: user.userId, musicId: req.params.id})
+                        .update({title: trackInfo.title})
                         .then(() => {
                             // UPDATE SUCCESS - Return updated record.
                             res.json(trackInfo);
@@ -179,7 +245,7 @@ router.delete('/:id', (req, res) => {
 
     if (trackId) {
         knex("hn_Music")
-            .where({ ownerId: user.userId, musicId: trackId })
+            .where({ownerId: user.userId, musicId: trackId})
             .del()
             .then(() => {
 
