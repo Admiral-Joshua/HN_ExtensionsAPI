@@ -55,58 +55,51 @@ router.get('/list/:id', (req, res) => {
 });
 
 
-// GET
-// 'map?node=id&file=id
-// Maps a file with the given ID, to a node with given id.
-router.get('/map', (req, res) => {
-    let knex = req.app.get('db');
+// MULTI-OPERATION
+// 'link?node=id&file=id
+// Creates or removes a link between an existing file and node
+router.route('/link/:nodeId/:fileId')
+    .all((req, res, next) => {
+        // Validate first...
+        req.nodeId = parseInt(req.path.nodeId);
+        req.fileId = parseInt(req.path.fileId);
 
-    let nodeId = parseInt(req.query.node);
-    let fileId = parseInt(req.query.file);
+        if (!isNaN(req.nodeId) && !isNaN(req.fileId)) {
+            next();
+        } else {
+            res.status(500).send(`Missing ${!isNaN(req.nodeId) ? 'NodeID' : 'FileID'} for link to be created.`);
+        }
+    })
+    .get((req, res) => {
+        let knex = req.app.get('db');
 
-    if (!isNaN(nodeId) && !isNaN(fileId)) {
+            knex("ln_Comp_File")
+                .where({ nodeId: req.nodeId, fileId: req.fileId })
+                .first()
+                .then(row => {
+                    if (row) {
+                        res.sendStatus(204);
+                    } else {
+                        knex("ln_Comp_File")
+                            .insert({
+                                nodeId: req.nodeId,
+                                fileId: req.fileId
+                            })
+                            .then(() => {
+                                res.sendStatus(204);
+                            });
+                    }
+                })
+
+    })
+    .delete((req, res) => {
+        let knex = req.app.get('db');
+        let user = req.user;
+
         knex("ln_Comp_File")
-            .where({ nodeId: nodeId, fileId: fileId })
-            .first()
-            .then(row => {
-                if (row) {
-                    res.sendStatus(204);
-                } else {
-                    knex("ln_Comp_File")
-                        .insert({
-                            nodeId: nodeId,
-                            fileId: fileId
-                        })
-                        .then(() => {
-                            res.sendStatus(204);
-                        });
-                }
-            })
-    } else {
-        res.status(400);
-        res.send(`Missing ${!isNaN(nodeId) ? 'NodeID' : 'FileID'} for link to be created.`);
-    }
-});
-
-// GET
-// 'unmap?node=id&file=id
-// Removes mapping between file with specified ID, and node with specified ID.
-router.get('/unmap', (req, res) => {
-    let knex = req.app.get('db');
-    let user = req.user;
-
-    let nodeId = parseInt(req.query.node);
-    let fileId = parseInt(req.query.file);
-
-    if (nodeId && !isNaN(nodeId) && fileId && !isNaN(fileId)) {
-        knex("ln_Comp_File")
-            .where({ nodeId: nodeId, fileId: fileId })
+            .where({ nodeId: req.nodeId, fileId: req.fileId })
             .del();
-    } else {
-        res.status(400);
-        res.send(`Missing ${!nodeId ? 'NodeID' : 'FileID'} for link to be created.`);
-    }
-});
+    });
 
 // GET
 // '/:id'

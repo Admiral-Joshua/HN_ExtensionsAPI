@@ -22,56 +22,44 @@ router.get('/list/:id', (req, res) => {
     }
 });
 
-// GET
-// '/map?email=<id>&attachment=<id>
-// Maps attachment up with email
-router.get('/map', (req, res) => {
-    let knex = req.app.get('db');
+// MULTI-OP Request
+// '/link/:emailId/:attachmentId'
+// Add or removes a link between the specified email and attachment.
+router.route('/link/:emailId/:attachmentId')
+    .all((req, res, next) => {
+        req.emailId = parseInt(req.path.email);
+        req.attachmentId = parseInt(req.path.attachment);
 
-    let emailId = parseInt(req.query.email);
-    let attachmentId = parseInt(req.query.attachment);
-
-    if (!isNaN(emailId) && !isNaN(attachmentId)) {
+        if (!isNaN(req.emailId) && !isNaN(req.attachmentId)) {
+            next();
+        } else {
+            res.status(400);
+            res.send(`${isNaN(req.emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.`);
+        }
+    })
+    .get((req, res) => {
         knex("ln_attachment_email")
             .insert({
-                emailId: emailId,
-                attachmentId: attachmentId
+                emailId: req.emailId,
+                attachmentId: req.attachmentId
             })
             .then(() => {
                 res.sendStatus(204);
-            })
-    } else {
-        res.status(400);
-        res.send(`${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.`);
-    }
-});
-
-// GET
-// '/unmap?email=<id>&attachment=<id>
-// Unmaps attachment from an email
-router.get('/unmap', (req, res) => {
-    let knex = req.app.get('db');
-
-    let emailId = parseInt(req.query.email);
-    let attachmentId = parseInt(req.query.attachment);
-
-    if (!isNaN(emailId) && !isNaN(attachmentId)) {
+            });
+    })
+    .delete((req, res) => {
         knex("ln_attachment_email")
             .update({
                 attachmentId: null
             })
             .where({
-                emailId: emailId,
-                attachmentId: attachmentId
+                emailId: req.emailId,
+                attachmentId: req.attachmentId
             })
             .then(() => {
                 res.sendStatus(204);
-            })
-    } else {
-        res.status(400);
-        res.send(`${isNaN(emailId) ? 'Email' : 'Attachment'} ID not specified or is invalid.`);
-    }
-});
+            });
+    });
 
 // GET
 // '/types/list'
