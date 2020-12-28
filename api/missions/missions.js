@@ -104,6 +104,36 @@ router.get('/functions/list', (req, res) => {
 })
 
 // GET
+// '/nextMission?m1=<id>&m2=<id>
+// Creates a next mission link between two missions.
+router.get('/nextMission', (req, res) => {
+    let knex = req.app.get('db');
+
+    let currentExtension = req.cookies.extId;
+
+    let missionOne = parseInt(req.query.m1);
+    let missionTwo = parseInt(req.query.m2);
+
+    if (missionOne && !isNaN(missionOne) && missionTwo && !isNaN(missionTwo)) {
+        knex("hn_Mission")
+            .update({
+                nextMission: missionTwo
+            })
+            .where({ missionId: missionOne })
+            .then(() => {
+                res.sendStatus(204);
+            })
+            .catch((err) => { // Catch - Likely, the foreign key constraint failed as specified mission two does not exist.
+                // TODO: Proper 404 error when mission two does not exist.
+                console.log(err);
+            })
+    } else {
+        res.status(400);
+        res.send(`<h2>Mission ${missionOne ? 'Two' : 'One'} not specified, or invalid.`);
+    }
+});
+
+// GET
 // '/:id'
 // Retrieves Mission information for mission with the given mission ID.
 router.get('/:id', (req, res) => {
@@ -208,37 +238,6 @@ router.delete('/branch/:id', (req, res) => {
     } else {
         res.status(400);
         res.send("No Branch ID specified or is invalid.");
-    }
-});
-
-// GET
-// '/nextMission?m1=<id>&m2=<id>
-// Creates a next mission link between two missions.
-router.get('/nextMission', (req, res) => {
-    let knex = req.app.get('db');
-
-    let currentExtension = req.cookies.extId;
-
-    let missionOne = parseInt(req.query.m1);
-    let missionTwo = parseInt(req.query.m2);
-
-    if (missionOne && !isNaN(missionOne) && missionTwo && !isNaN(missionTwo)) {
-        knex("hn_Mission")
-            .update({
-                nextMission: missionTwo,
-                extensionId: currentExtension
-            })
-            .where({ missionId: missionOne })
-            .then(() => {
-                res.sendStatus(204);
-            })
-            .catch((err) => { // Catch - Likely, the foreign key constraint failed as specified mission two does not exist.
-                // TODO: Proper 404 error when mission two does not exist.
-                console.log(err);
-            })
-    } else {
-        res.status(400);
-        res.send(`<h2>Mission ${missionOne ? 'Two' : 'One'} not specified, or invalid.`);
     }
 });
 
