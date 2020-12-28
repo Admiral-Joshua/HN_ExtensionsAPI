@@ -3,9 +3,9 @@ info:
   title: luna.v1
   version: '1.0'
   contact:
-    name: Joshua Richardson-Noyes
+    name: Leila Richardson-Noyes
     url: lunasphere.co.uk/contact
-    email: joshua.richardson-noyes@lunasphere.co.uk
+    email: leila.richardson-noyes@lunasphere.co.uk
   license:
     name: UNLICENSED
   description: Authentication API used by the entire Lunasphere suite to create/login/delete accounts.

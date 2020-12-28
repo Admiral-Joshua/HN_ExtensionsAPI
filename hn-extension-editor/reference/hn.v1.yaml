@@ -6,8 +6,8 @@ info:
   license:
     name: Copyright © 2020 Lunasphere Entertainment. All rights reserved.
   contact:
-    name: Joshua Richardson-Noyes
-    email: joshua.richardson-noyes@lunasphere.co.uk
+    name: Leila Richardson-Noyes
+    email: leila.richardson-noyes@lunasphere.co.uk
     url: lunasphere.co.uk
 servers:
   - url: 'https://hn.luansphere.co.uk/api'
@@ -403,8 +403,8 @@ paths:
   '/nodes/files/{id}':
     parameters:
       - schema:
-          type: string
-        name: id
+          type: integer
+        name: fileId
         in: path
         required: true
     get:
@@ -666,9 +666,9 @@ paths:
         - Mission Ops
         - Email
         - Attachments
-  /missions/email/attachment/map:
+  '/missions/email/attachment/link/{emailId}/{attachmentId}':
     get:
-      summary: Map Attachment to Email
+      summary: Link Attachment with Email
       tags:
         - Mission Ops
         - Email
@@ -679,7 +679,7 @@ paths:
         '400':
           description: (Email or Attachment) ID not specified or is invalid.
       operationId: map-missions-email-attachment
-      description: Creates a link between an attachment and an email.
+      description: "Creates a link between an existing attachment and an email (if it doesn't already exist.)"
       security:
         - JWT Generated Token: []
         - ExtensionID: []
@@ -698,38 +698,61 @@ paths:
           name: attachment
           description: Attachment ID this link is to
           required: true
-  /missions/email/attachment/unmap:
-    get:
-      summary: Unmap Attachment from Email
-      tags:
-        - Mission Ops
-        - Email
-        - Attachments
+    parameters:
+      - schema:
+          type: integer
+        name: emailId
+        in: path
+        required: true
+        description: ID of the email this attachment will be linked to.
+      - schema:
+          type: integer
+        name: attachmentId
+        in: path
+        required: true
+        description: ID of the attachment to be linked.
+    delete:
+      summary: Remove Attachment Link from Email
+      operationId: delete-missions-email-attachment-link-emailId-attachmentId
       responses:
         '204':
           description: No Content
         '400':
-          description: (Email or Attachment) ID not specified or is invalid.
-      operationId: unmap-missions-email-attachment
-      description: Removes a link between an attachment and an email.
-      security:
-        - JWT Generated Token: []
-        - ExtensionID: []
-      parameters:
-        - schema:
-            type: integer
-            minimum: 1
-          in: query
-          name: email
-          description: Email ID the attachment is linked to
-          required: true
-        - schema:
-            type: integer
-            minimum: 1
-          in: query
-          name: attachment
-          description: Attachment ID this link is to
-          required: true
+          description: Bad Request
+      description: Removes the specified attachment from the specified email.
+  '/nodes/files/link/{nodeId}/{fileId}':
+    get:
+      summary: Add File to Node
+      tags: []
+      responses:
+        '204':
+          description: No Content
+        '500':
+          description: Internal Server Error
+      operationId: create-nodes-files-link
+      description: Creates a new link between the requested FileID and NodeID. Mapping the file to that node.
+    parameters:
+      - schema:
+          type: integer
+        name: fileId
+        in: path
+        required: true
+        description: ID number for the file to be linked.
+      - schema:
+          type: integer
+        name: nodeId
+        in: path
+        required: true
+        description: ID number for the node this file will exist in.
+    delete:
+      summary: Delete File link from Node
+      operationId: delete-nodes-files-link-nodeId-fileId
+      responses:
+        '204':
+          description: No Content
+        '500':
+          description: Internal Server Error
+      description: Deletes a link (if it exists) between an existing Node and File within the extension.
 components:
   schemas:
     Extension_Info:

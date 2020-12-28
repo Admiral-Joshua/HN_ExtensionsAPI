@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS change_log (
     "object_id" int NOT NULL,
     "object_type_id" int NOT NULL,
     "last_change" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "last_build" TIMESTAMP
+    "last_build" TIMESTAMP,
+    "is_deleted" boolean NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS change_obj_type (
@@ -42,7 +43,9 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION extensioninfodeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."extensionId" AND object_type_id = 1;
+        -- DELETE FROM change_log WHERE object_id = OLD."extensionId" AND object_type_id = 1;
+        -- Mark object for deletion to the builder.
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."extensionId" AND object_type_id = 1;
         PERFORM pg_notify('changelog', '1 ' || OLD."extensionId");
         RETURN NULL;
     END;
@@ -64,7 +67,7 @@ FOR EACH ROW EXECUTE PROCEDURE extensioninfodeleted();
 -- Procedures
 CREATE OR REPLACE FUNCTION musictrackcreated() RETURNS TRIGGER AS $example_table$
     BEGIN
-        INSERT INTO change_log (meta_id, object_id, object_type_id, last_change) VALUES (NEW."ownerId", NEW."musicId", 2, CURRENT_TIMESTAMP);
+        INSERT INTO change_log (meta_id, object_id, object_type_id, last_change) VALUES (NEW."extensionId", NEW."musicId", 2, CURRENT_TIMESTAMP);
         PERFORM pg_notify('changelog', '2 ' || NEW."musicId");
         RETURN NULL;
     END;
@@ -72,7 +75,7 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION musictrackupdated() RETURNS TRIGGER AS $example_table$
     BEGIN
-        UPDATE change_log SET last_change = CURRENT_TIMESTAMP WHERE object_id = NEW."musicId" AND meta_id = NEW."ownerId" AND object_type_id = 2;
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP WHERE object_id = NEW."musicId" AND object_type_id = 2;
         PERFORM pg_notify('changelog', '2 ' || NEW."musicId");
         RETURN NULL;
     END;
@@ -80,20 +83,21 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION musictrackdeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."musicId" AND object_type_id = 2;
+        -- Mark track for deletion
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."musicId" AND meta_id = OLD."extensionId" AND object_type_id = 2;
         PERFORM pg_notify('changelog', '2 ' || OLD."musicId");
         RETURN NULL;
     END;
 $example_table$ LANGUAGE plpgsql;
 
 -- Triggers
-CREATE TRIGGER music_created AFTER INSERT ON "hn_Music"
+CREATE TRIGGER music_created AFTER INSERT ON "LN_extension_music"
 FOR EACH ROW EXECUTE PROCEDURE musictrackcreated();
 
 CREATE TRIGGER music_updated AFTER UPDATE ON "hn_Music"
 FOR EACH ROW EXECUTE PROCEDURE musictrackupdated();
 
-CREATE TRIGGER music_deleted AFTER DELETE ON "hn_Music"
+CREATE TRIGGER music_deleted AFTER DELETE ON "LN_extension_music"
 FOR EACH ROW EXECUTE PROCEDURE musictrackdeleted();
 
 -- ----------------------------------------------
@@ -117,7 +121,9 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION missiondeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."missionId" AND object_type_id = 3;
+        -- DELETE FROM change_log WHERE object_id = OLD."missionId" AND object_type_id = 3;
+        -- Mark Mission for deletion
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."missionId" AND meta_id = OLD."extensionId" AND object_type_id = 3;
         PERFORM pg_notify('changelog', '3 ' || OLD."missionId");
         RETURN NULL;
     END;
@@ -154,7 +160,8 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION nodedeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."nodeId" AND object_type_id = 4;
+        -- Mark node for deletion
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."nodeId" AND meta_id = OLD."extensionId" AND object_type_id = 4;
         PERFORM pg_notify('changelog', '4 ' || OLD."nodeId");
         RETURN NULL;
     END;
@@ -191,7 +198,8 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION themedeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."themeId" AND object_type_id = 6;
+        -- Mark Theme for deletion
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."themeId" AND meta_id = OLD."extensionId" AND object_type_id = 6;
         PERFORM pg_notify('changelog', '6 ' || OLD."themeId");
         RETURN NULL;
     END;
@@ -228,7 +236,8 @@ $example_table$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION actionsetdeleted() RETURNS TRIGGER AS $example_table$
     BEGIN
-        DELETE FROM change_log WHERE object_id = OLD."actionSetId" AND object_type_id = 7;
+        -- Mark ActionSet for deletion
+        UPDATE change_log SET last_change = CURRENT_TIMESTAMP, is_deleted = TRUE WHERE object_id = OLD."actionSetId" AND meta_id = OLD."extensionId" AND object_type_id = 7;
         PERFORM pg_notify('changelog', '7 ' || OLD."actionSetId");
         RETURN NULL;
     END;
@@ -268,3 +277,7 @@ CREATE TABLE IF NOT EXISTS "build_job" (
 
 /*CREATE TRIGGER actionset_deleted AFTER DELETE ON "change_log"
 FOR EACH ROW EXECUTE PROCEDURE buildjob();*/
+CREATE TABLE "LN_extension_music" (
+    "musicId" int NOT NULL,
+    "extensionId" INT NOT NULL
+);

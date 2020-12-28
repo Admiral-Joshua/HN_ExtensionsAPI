@@ -65,6 +65,8 @@ router.route('/:jobId')
 
         let jobInfo = req.body;
 
+        console.log(`Submitting an ${jobInfo.rebuild ? 'Rebuild' : 'Incremental'} build job to the queue for extension with ID ${jobInfo.extension_id}`);
+
         if (!jobInfo.rebuild) {
             knex("build_job")
                 .update({
@@ -73,7 +75,8 @@ router.route('/:jobId')
                     time_submitted: knex.raw("CURRENT_TIMESTAMP")
                 })
                 .where({
-                    job_id: req.params.jobId
+                    job_id: req.params.jobId,
+                    extension_id: jobInfo.extension_id
                 })
                 .then(() => {
                     res.json(jobInfo);
