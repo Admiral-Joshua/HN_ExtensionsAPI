@@ -150,6 +150,21 @@ router.get('/:id', (req, res) => {
             .first()
             .then(mission => {
                 if (mission) {
+
+                    mission.missionStart = {
+                        functionId: mission.missionStart_ID,
+                        meta: mission.missionStart_Meta,
+                        value: mission.missionStart_val,
+                        suppress: mission.missionStart_suppress
+                    };
+
+                    mission.missionEnd = {
+                        functionId: mission.missionEnd_ID,
+                        meta: mission.missionEnd_Meta,
+                        value: mission.missionEnd_val,
+                        suppress: mission.missionEnd_suppress
+                    }
+
                     res.json(mission);
                 } else {
                     res.status(404);
@@ -261,12 +276,21 @@ router.post('/new', (req, res) => {
             activeCheck: missionInfo.activeCheck,
             id: missionInfo.id,
             shouldIgnoreSenderVerification: missionInfo.shouldIgnoreSenderVerification,
-            missionStart: missionInfo.missionStart,
-            missionEnd: missionInfo.missionEnd,
-            //nextMission: missionInfo.nextMission,
+
+            missionStart_ID: missionInfo.missionStart['functionId'],
+            missionStart_Meta: missionInfo.missionStart['meta'],
+            missionStart_val: missionInfo.missionStart['value'],
+            missionStart_suppress: missionInfo.missionStart['suppress'],
+
+            missionEnd_ID: missionInfo.missionEnd['functionId'],
+            missionEnd_Meta: missionInfo.missionEnd['meta'],
+            missionEnd_val: missionInfo.missionEnd['value'],
+            missionEnd_suppress: missionInfo.missionEnd['suppress'],
+
             IsSilent: missionInfo.IsSilent,
             emailId: missionInfo.emailId,
-            postingId: missionInfo.postingId
+            postingId: missionInfo.postingId,
+
         })
         .returning("missionId")
         .then((ids) => {
@@ -314,8 +338,17 @@ router.put('/:id', (req, res) => {
                         id: missionInfo.id,
                         activeCheck: missionInfo.activeCheck,
                         shouldIgnoreSenderVerification: missionInfo.shouldIgnoreSenderVerification,
-                        missionStart: missionInfo.missionStart,
-                        missionEnd: missionInfo.missionEnd,
+
+                        missionStart_ID: missionInfo.missionStart['functionId'],
+                        missionStart_Meta: missionInfo.missionStart['meta'],
+                        missionStart_val: missionInfo.missionStart['value'],
+                        missionStart_suppress: missionInfo.missionStart['suppress'],
+
+                        missionEnd_ID: missionInfo.missionEnd['functionId'],
+                        missionEnd_Meta: missionInfo.missionEnd['meta'],
+                        missionEnd_val: missionInfo.missionEnd['value'],
+                        missionEnd_suppress: missionInfo.missionEnd['suppress'],
+
                         IsSilent: missionInfo.IsSilent,
                         emailId: missionInfo.emailId,
                         postingId: missionInfo.postingId,
